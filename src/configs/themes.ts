@@ -45,16 +45,14 @@ const lightTheme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: '#5A9BD5',
-            light: '#F2F9FD',
+            main: '#3C4A8C',
         },
         secondary: {
-            main: '#646072',
+            main: '#C3D1F5',
         },
         background: {
-            default: '#f1f6fa',
-            paper: '#FFFFFF',
-            footer: '#2C4C6B',
+            default: '#FFFFFF',
+            paper: '#F0F4FF',
         },
         text: {
             primary: '#000000',

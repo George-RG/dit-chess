@@ -11,6 +11,8 @@ import Box from '@mui/material/Box';
 
 import DesktopHeader from './Elements/Headers/DesktopHeader';
 import MobileHeader from './Elements/Headers/MobileHeader';
+import MobileFooter from './Elements/Footers/MobileFooter';
+import DesktopFooter from './Elements/Footers/DesktopFooter';
 
 const ThemePaletteModeContext = React.createContext({
   toggleThemePaletteMode: () => { }
@@ -52,16 +54,15 @@ const App: React.FC = () => {
           <Box sx={{ display: {xs : 'none', md: 'flex'} }}>
             <DesktopHeader />
           </Box>
-          
           <Routes>
             <Route path="/" element={<Arena />} />
           </Routes>
 
-          <Box sx={{ display: {xs : 'flex', md: 'none'} }}>
-            {/* <MobileFooter /> */}
+          <Box sx={{ display: {xs : 'flex', md: 'none'}}}>
+            <MobileFooter />
           </Box>
-          <Box sx={{ display: {xs : 'none', md: 'flex'} }}>
-            {/* <DesktopFooter /> */}
+          <Box sx={{ display: {xs : 'none', md: 'flex'}, widht:"100%"}}>
+            <DesktopFooter />
           </Box>
         </Box>
     </ThemeProvider>

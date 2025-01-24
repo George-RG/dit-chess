@@ -32,18 +32,21 @@ function DesktopHeader() {
   return (
     <AppBar position="static" sx={{ width: '100%' }}>
       <Toolbar>
-        <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+        <img 
+        src="/chess-logo.png" 
+        alt="Dit Chess Logo" 
+        style={{ height: '50px', marginRight: '8px' }} 
+        />
         <Typography
           variant="h6"
           noWrap
           component="a"
-          href="/"
+          href="/arena"
           sx={{
             mr: 2,
             display: { xs: 'none', md: 'flex' },
-            fontFamily: 'monospace',
+            fontFamily: 'Inter',
             fontWeight: 700,
-            letterSpacing: '.3rem',
             color: 'inherit',
             textDecoration: 'none',
           }}
@@ -51,62 +54,55 @@ function DesktopHeader() {
           Dit Chess
         </Typography>
 
-        {/* Mobile menu */}
-        <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-          <IconButton
-            size="large"
-            aria-label="menu"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleOpenNavMenu}
-            color="inherit"
-          >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorElNav}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
-            }}
-            open={Boolean(anchorElNav)}
-            onClose={handleCloseNavMenu}
-          >
-            {pages.map((page) => (
-              <MenuItem
-                key={page.name}
-                onClick={handleCloseNavMenu}
-                component={Link}
-                to={page.path}
-              >
-                <Typography textAlign="center">{page.name}</Typography>
-              </MenuItem>
-            ))}
-          </Menu>
-        </Box>
-
         {/* Desktop menu */}
-        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-          {pages.map((page) => (
-            <Button
-              key={page.name}
-              component={Link}
-              to={page.path}
-              sx={{
-                my: 2,
-                color: location.pathname === page.path ? 'secondary.main' : 'white',
-                display: 'block',
-              }}
-            >
-              {page.name}
-            </Button>
-          ))}
+        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, marginLeft: "10px" }}>
+          <Button
+            key={"arena"}
+            component={Link}
+            to={'/arena'}
+            sx={{
+              my: 2,
+              color: location.pathname === '/arena' ? "white" : "main.secondary",
+              display: 'block',
+              fontSize:"16px",
+              marginRight: "10px"
+            }}
+          >
+            1v1 Arena
+          </Button>
+
+          <Button
+            key={"tournament"}
+            component={Link}
+            to={'/arena'}
+            disabled
+            sx={{
+              my: 2,
+              color: location.pathname === '/tournament' ? "white" : "#ddd",
+              display: 'block',
+              fontSize:"16px",
+              marginRight: "10px"
+            }}
+          >
+            Tournament
+          </Button>
+
+          <Button
+            key={"arena"}
+            component={Link}
+            to={'/arena'}
+            disabled
+            sx={{
+              my: 2,
+              color: location.pathname === '/live' ? "white" : "#ddd",
+              display: 'block',
+              fontSize:"16px",
+              marginRight: "10px"
+            }}
+          >
+            Live
+          </Button>
+          
         </Box>
       </Toolbar>
     </AppBar>

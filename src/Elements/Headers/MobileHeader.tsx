@@ -31,7 +31,28 @@ function MobileHeader() {
 
   return (
     <AppBar position="static" sx={{ width: '100%' }}>
-      tipota
+      <Toolbar>
+      <img 
+      src="/chess-logo.png" 
+      alt="Dit Chess Logo" 
+      style={{ height: '50px', marginRight: '8px' }} 
+      />
+    <Typography
+      variant="h6"
+      noWrap
+      component="a"
+      href="/arena"
+      sx={{
+        mr: 2,
+        fontFamily: 'Inter',
+        fontWeight: 700,
+        color: 'inherit',
+        textDecoration: 'none',
+      }}
+    >
+      Dit Chess
+    </Typography>
+  </Toolbar>
     </AppBar>
   );
 }
