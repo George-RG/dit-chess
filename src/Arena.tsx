@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Chessboard } from "react-chessboard";
 import Box from '@mui/material/Box'
 import { Button, Container, FormControl, Stack, Typography } from '@mui/material';
@@ -8,22 +8,26 @@ import { useTheme } from '@mui/material/styles';
 
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import FormHelperText from '@mui/material/FormHelperText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { SocialDistanceRounded } from '@mui/icons-material';
+import Engines  from './engines';
+
+const engines = new Engines();
 
 function Arena() {
   const theme = useTheme();
-  const [player1, setPlayer1] = useState({id: -1, name: "Player 1"})
-  const [player2, setPlayer2] = useState({id: -1, name: "Player 2"})
+  const [engine1, setEngine1] = useState<string>('Player 1');
+  const [engine2, setEngine2] = useState<string>('Player 2');
+  const [engineNames, setEngineNames] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+
   const [score, setScore] = useState({p1: 0, p2: 0, games: 1});
   const [delay, setDelay] = useState(0);
 
-  const playerList = [{id: 0, name: "GeorgeRG"}, {id: 1, name: "Matboi"}];
 
-  const updateScore = (target, val) => {
+  const updateScore = (target: string, val: number ) => {
     if(target == 'p1')
       setScore({p1: score.p1 + 1, p2: score.p2, games: score.games})
     else if(target == 'p2')
@@ -33,17 +37,21 @@ function Arena() {
     else if(target == 'restart')
       setScore({p1: 0, p2: 0, games: score.games})
   }
-
-
-  const changePlayer1 = (player) => {
-      setPlayer1(player);
+1
+  const changeEngine1 = (engine: string) => {
+      setEngine1(engine);
       updateScore('reset', 0);
     }
 
-  const changePlayer2 = (player) => {
-    setPlayer2(player);
+  const changeEngine2 = (engine: string) => {
+    setEngine2(engine);
     updateScore('reset', 0);
   }
+
+  useEffect(() => {
+    setEngineNames(engines.engineNames);
+    setLoaded(engines.isReady);
+  }, [engines]);
 
   
   return (
@@ -60,7 +68,7 @@ function Arena() {
               <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: 10, paddingY: 5, borderRadius: 5 }}>
                 <Stack direction="row" spacing={2} sx={{justifyContent: 'center', alignItems: 'center'}}>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Typography variant="h5">{player1.name}</Typography>
+                    <Typography variant="h5">{engine1}</Typography>
                     <Typography variant="h2">{score.p1}</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
@@ -68,7 +76,7 @@ function Arena() {
                     <Typography variant="h4">VS</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Typography variant="h5">{player2.name}</Typography>
+                    <Typography variant="h5">{engine2}</Typography>
                     <Typography variant="h2">{score.p2}</Typography>
                   </Box>
                 </Stack>
@@ -78,25 +86,22 @@ function Arena() {
                 <Grid container columnSpacing={1} rowSpacing={5}>
                   <Grid size={{xs: 6}}>
                     <FormControl sx={{width: "90%"}}>
-                      <InputLabel id="Player1">Player 1</InputLabel>
+                      <InputLabel id="Player1-id">Player 1</InputLabel>
                       <Select
-                        labelId="Player1"
-                        id="Player1"
-                        value={player1.id}
+                        labelId="Player1-id"
+                        id="Player1-box"
+                        value={engine1}
                         label="Player 1"
-                        onChange={(event: SelectChangeEvent<number>) => {
-                          // Find the selected player object based on the id
-                          const selectedPlayer = playerList.find(player => player.id === event.target.value);
-                          if (selectedPlayer) {
-                            changePlayer1(selectedPlayer);
-                          }
-                        }}
+                        disabled={gameStarted || !loaded}
+                        onChange={(event: SelectChangeEvent<string>) => { changeEngine1(event.target.value); }}
                       >
-                        {playerList.map((player) => (
-                          <MenuItem key={player.id} value={player.id}>
-                            {player.name}
+                        {loaded && engineNames.map((engineName) => (
+                          <MenuItem key={engineName} value={engineName}>
+                            {engineName}
                           </MenuItem>
                         ))}
+                        {!loaded && <MenuItem value="Player 1">Loading...</MenuItem>}
+
                       </Select>
                     </FormControl>
                   </Grid>
@@ -107,21 +112,17 @@ function Arena() {
                       <Select
                         labelId="Player2"
                         id="Player2"
-                        value={player2.id}
+                        value={engine2}
                         label="Player 2"
-                        onChange={(event: SelectChangeEvent<number>) => {
-                          // Find the selected player object based on the id
-                          const selectedPlayer = playerList.find(player => player.id === event.target.value);
-                          if (selectedPlayer) {
-                            changePlayer2(selectedPlayer);
-                          }
-                        }}
+                        disabled={gameStarted || !loaded}
+                        onChange={(event: SelectChangeEvent<string>) => { changeEngine2(event.target.value); }}
                       >
-                        {playerList.map((player) => (
-                          <MenuItem key={player.id} value={player.id}>
-                            {player.name}
+                        {loaded && engineNames.map((engineName) => (
+                          <MenuItem key={engineName} value={engineName}>
+                            {engineName}
                           </MenuItem>
                         ))}
+                        {!loaded && <MenuItem value="Player 2">Loading...</MenuItem>}
                       </Select>
                     </FormControl>
                   </Grid>
@@ -155,7 +156,7 @@ function Arena() {
                         value={score.games}
                         label="Number of Games"
                         onChange={(event: SelectChangeEvent<number>) => {
-                          updateScore('games', event.target.value);
+                          updateScore('games', event.target.value as number);
                         }}
                       >
                         <MenuItem value={1}>1</MenuItem>
@@ -173,7 +174,12 @@ function Arena() {
                     <Stack direction="column" spacing={1}>
                       <FormControlLabel disabled control={<Checkbox />} label="Log Results" />
                       {/* Play button */}
-                      <Button variant="contained" size='large' sx={{borderRadius: 5}}>
+                      <Button 
+                        variant="contained" 
+                        size='large' 
+                        sx={{borderRadius: 5}}
+                        disabled={!loaded}
+                      >
                         Play
                       </Button>
                     </Stack>

@@ -88,9 +88,9 @@ function DesktopHeader() {
           </Button>
 
           <Button
-            key={"arena"}
+            key={"live"}
             component={Link}
-            to={'/arena'}
+            to={'/live'}
             disabled
             sx={{
               my: 2,
