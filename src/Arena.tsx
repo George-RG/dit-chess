@@ -3,6 +3,7 @@ import { Chessboard } from "react-chessboard";
 import Box from '@mui/material/Box'
 import { Button, Container, FormControl, Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
+import { Chess } from "chess.js";
 
 import { useTheme } from '@mui/material/styles';
 
@@ -22,22 +23,83 @@ function Arena() {
   const [engineNames, setEngineNames] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [boardPosition, setBoardPosition] = useState("start");
+  const [errorState, setErrorState] = useState("None");
+  const [stopGame, setStopGame] = useState(false);
 
   const [score, setScore] = useState({p1: 0, p2: 0, games: 1});
   const [delay, setDelay] = useState(0);
 
+  const [game, setGame] = useState(new Chess());
+
+  function makeAMove(move) {
+    const gameCopy = game;
+    const result = gameCopy.move(move);
+
+    if(result === null)
+    {  
+      console.log("Bro who made this trash?");
+    }
+    else
+    {
+      setGame(gameCopy);
+    }
+    return result; // null if the move was illegal, the move object if the move was legal
+  }
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function Referee()
+  {
+    setGameStarted(true);
+    for (let i = 1; i <= score.games; i++) {
+      let white_turn = true;
+      setGame(new Chess());
+      while(!game.isGameOver() && !game.isDraw())
+      {
+        const moves = game.moves();
+        white_turn ? console.log("Paizei o aspros") : console.log("Paizei o mauros");        
+        
+        // Call the agent
+        i = 0;
+        //
+
+        if(makeAMove(moves[i]) === null)
+        {
+          white_turn ? setErrorState("WhiteIllegal") : setErrorState("BlackIlligal"); 
+        }
+        else
+        {
+          setBoardPosition(game.fen())
+          await wait(delay*1000);
+          white_turn = !white_turn;
+        }
+        // if(!gameStarted)
+        //   return;
+      }
+      if(game.isDraw() || game.isThreefoldRepetition())
+        updateScore('tie', 0.5);
+      else
+        white_turn ? updateScore('p1', 0) : updateScore('p2', 0);
+    }
+    setGameStarted(false);
+  }
 
   const updateScore = (target: string, val: number ) => {
     if(target == 'p1')
       setScore({p1: score.p1 + 1, p2: score.p2, games: score.games})
     else if(target == 'p2')
       setScore({p1: score.p1, p2: score.p2 + 1, games: score.games})
+    else if(target == 'tie')
+      setScore({p1: score.p1 + val, p2: score.p2 + val, games: score.games})
     else if(target == 'games')
       setScore({p1: 0, p2: 0, games: val})
     else if(target == 'restart')
       setScore({p1: 0, p2: 0, games: score.games})
   }
-1
+
   const changeEngine1 = (engine: string) => {
       setEngine1(engine);
       updateScore('reset', 0);
@@ -60,7 +122,7 @@ function Arena() {
         <Grid container spacing={10} sx={{ padding: 2, }}>
           <Grid size={{xs: 12, lg: 6}}>
               <Box sx={{backgroundColor: theme.palette.primary.dark, padding: 1, borderRadius: 4}}>
-                <Chessboard />
+                <Chessboard position={boardPosition} arePiecesDraggable={false}/>
               </Box>
           </Grid>
           <Grid size={{xs: 12, lg: 6}}>
@@ -174,14 +236,30 @@ function Arena() {
                     <Stack direction="column" spacing={1}>
                       <FormControlLabel disabled control={<Checkbox />} label="Log Results" />
                       {/* Play button */}
+                      {
+                        !gameStarted ? 
                       <Button 
                         variant="contained" 
                         size='large' 
                         sx={{borderRadius: 5}}
                         disabled={!loaded}
+                        onClick={()=> {Referee()}}
                       >
                         Play
                       </Button>
+                      :
+                      <Button 
+                        variant="contained" 
+                        size='large' 
+                        sx={{borderRadius: 5, backgroundColor: 'red'}}
+                        disabled={!loaded}
+                        onClick={()=> {setGameStarted(false);}}
+                      >
+                        Stop Game
+                      </Button>
+
+                      }
+                      
                     </Stack>
                   </Grid>
 
