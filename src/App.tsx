@@ -56,6 +56,7 @@ const App: React.FC = () => {
           </Box>
           <Routes>
             <Route path="/" element={<Arena />} />
+            <Route path="/arena" element={<Arena />} />
           </Routes>
 
           <Box sx={{ display: {xs : 'flex', md: 'none'}}}>

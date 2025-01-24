@@ -62,7 +62,7 @@ function DesktopHeader() {
             to={'/arena'}
             sx={{
               my: 2,
-              color: location.pathname === '/arena' ? "white" : "main.secondary",
+              color: location.pathname === '/arena' || location.pathname === '/' ? "white" : "main.secondary",
               display: 'block',
               fontSize:"16px",
               marginRight: "10px"
