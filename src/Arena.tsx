@@ -160,6 +160,10 @@ function Arena() {
                 </Stack>
               </Box>
 
+              <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', padding: 4, borderRadius: 5 }}>
+                <Typography variant="h5">Game Status: {gameStarted ? "Game in Progress" : "Game Stopped"}</Typography>
+              </Box> 
+
               <Box sx={{ bgcolor: theme.palette.background.paper, border: 'solid 2px', borderColor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: 10, paddingY: 5, borderRadius: 5, marginLeft: "10%" }}>
                 <Grid container columnSpacing={1} rowSpacing={5}>
                   <Grid size={{ xs: 6 }}>
