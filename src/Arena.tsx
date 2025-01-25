@@ -154,7 +154,7 @@ function Arena() {
                     <Typography variant="h4">VS</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Typography variant="h5">{engine2}</Typography>
+                    <Typography variant="h5">{engine2 === "" ? "Player 2" : engine2}</Typography>
                     <Typography variant="h2">{score.p2}</Typography>
                   </Box>
                 </Stack>
@@ -168,8 +168,8 @@ function Arena() {
                       <Select
                         labelId="Player1-id"
                         id="Player1-box"
-                        value={engine1}
                         label="Player 1"
+                        value=''
                         disabled={gameStarted || !loaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine1(event.target.value); }}
                       >
@@ -191,6 +191,7 @@ function Arena() {
                         labelId="Player2"
                         id="Player2"
                         label="Player 2"
+                        value=''
                         disabled={gameStarted || !loaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine2(event.target.value); }}
                       >
@@ -210,8 +211,8 @@ function Arena() {
                       <Select
                         labelId="MoveSpeed"
                         id="MoveSpeed"
-                        value={delay}
                         label="Time Control"
+                        value={delay}
                         onChange={(event: SelectChangeEvent<number>) => {
                           setDelay(Number(event.target.value));
                         }}
@@ -230,8 +231,8 @@ function Arena() {
                       <Select
                         labelId="GameNumber"
                         id="GameNumber"
-                        value={score.games}
                         label="Number of Games"
+                        value={score.games}
                         onChange={(event: SelectChangeEvent<number>) => {
                           updateScore('games', event.target.value as number);
                         }}

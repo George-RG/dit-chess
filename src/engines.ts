@@ -28,7 +28,6 @@ class Engines{
                 this.engineNames.push(engine.split('.')[0]);
             });
             this.isReady = true;
-            console.log("Engines fetched", this.engineFiles);
         }catch(err){
             this.isReady = false;
             console.error("Error fetching engines.json");
