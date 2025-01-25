@@ -7,20 +7,6 @@ class Engines{
     isReady: boolean = false;
 
     constructor(){
-        fetch('/engines/engines.json').then(response => {
-            return response.json();
-        }).then(data => {
-            this.engineFiles = data.engines;
-            this.engineFiles.forEach((engine) => {
-                this.engineNames.push(engine.split('.')[0]);
-            });
-            this.isReady = true;
-            console.log("Engines fetched", this.engineFiles);
-        }).catch(err => {
-            this.isReady = false;
-            console.error("Error fetching engines.json");
-            console.error(err);
-        });
     }
     
     getEngineFiles(){
@@ -29,6 +15,25 @@ class Engines{
 
     getEngineNames(){
         return this.engineNames;
+    }
+
+    async fetchEngines(){
+        try{
+            const response = await fetch('/engines/engines.json');
+            const data = await response.json();
+
+            this.engineFiles = data.engines;
+            this.engineNames = [];
+            this.engineFiles.forEach((engine) => {
+                this.engineNames.push(engine.split('.')[0]);
+            });
+            this.isReady = true;
+            console.log("Engines fetched", this.engineFiles);
+        }catch(err){
+            this.isReady = false;
+            console.error("Error fetching engines.json");
+            console.error(err);
+        }
     }
 }
 
