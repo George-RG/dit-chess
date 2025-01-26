@@ -19,8 +19,8 @@ function Arena() {
   const theme = useTheme();
   const engines = new Engines();
 
-  const [engine1, setEngine1] = useState<string>('');
-  const [engine2, setEngine2] = useState<string>('');
+  const [engine1, setEngine1] = useState<string>('Loading');
+  const [engine2, setEngine2] = useState<string>('Loading');
   const [engineNames, setEngineNames] = useState<string[]>([]);
 
   const [loaded, setLoaded] = useState(false);
@@ -127,6 +127,8 @@ function Arena() {
     // On load fetch the engines
     engines.fetchEngines().then(() => {
       setEngineNames(engines.getEngineNames());
+      setEngine1('');
+      setEngine2('');
       setLoaded(true);
     });
   }, []);
@@ -173,7 +175,7 @@ function Arena() {
                         labelId="Player1-id"
                         id="Player1-box"
                         label="Player 1"
-                        value=''
+                        value={engine1}
                         disabled={gameStarted || !loaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine1(event.target.value); }}
                       >
@@ -182,7 +184,7 @@ function Arena() {
                             {engineName}
                           </MenuItem>
                         ))}
-                        {!loaded && <MenuItem value="Player 1">Loading...</MenuItem>}
+                        {!loaded && <MenuItem value="Loading">Loading...</MenuItem>}
 
                       </Select>
                     </FormControl>
@@ -195,7 +197,7 @@ function Arena() {
                         labelId="Player2"
                         id="Player2"
                         label="Player 2"
-                        value=''
+                        value={engine2}
                         disabled={gameStarted || !loaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine2(event.target.value); }}
                       >
@@ -204,7 +206,7 @@ function Arena() {
                             {engineName}
                           </MenuItem>
                         ))}
-                        {!loaded && <MenuItem value="Player 2">Loading...</MenuItem>}
+                        {!loaded && <MenuItem value="Loading">Loading...</MenuItem>}
                       </Select>
                     </FormControl>
                   </Grid>
