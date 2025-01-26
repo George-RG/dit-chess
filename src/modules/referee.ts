@@ -68,7 +68,7 @@ export class Referee {
     gameStarted: boolean = false;
     gameReady: boolean = false;
 
-    constructor(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void) {
+    constructor(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void, delay?: number) {
         this.state = {
             whiteEngineSource: whiteEngine || '',
             blackEngineSource: blackEngine || '',
@@ -77,7 +77,7 @@ export class Referee {
             whiteEngineMove: randomEngine,
             blackEngineMove: randomEngine,
             timeout: 5,
-            moveInterval: 1,
+            moveInterval: delay || 1,
         };
 
         this.onMove = onMove || function () { };
@@ -85,8 +85,9 @@ export class Referee {
 
     // Method to pass to the chessboard component
     onDragStart: (args:{piece: Piece, sourceSquare: Square}) => boolean = (args) => {
-        console.log(this.state.game.turn())
+        
         if(!this.gameStarted) return false;
+        return true;
         
         if (this.state.game.isGameOver() === true ||
             (this.state.game.turn() === 'w' && args.piece.search(/^b/) !== -1) ||

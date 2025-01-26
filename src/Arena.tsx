@@ -38,6 +38,8 @@ function Arena() {
   const [delay, setDelay] = useState(0);
 
   const [game, setGame] = useState(new Chess());
+  const [referee, setReferee] = useState(new Referee());
+
 
   function makeAMove(move) {
     const gameCopy = game;
@@ -121,10 +123,12 @@ function Arena() {
       return false;
     }
 
-    referee.setDelay = delay;
-    referee.initGame(engine1, engine2).then(() => {
-      referee.startGame();
+    const newRef = new Referee(engine1, engine2, onMove, delay);
+    newRef.initGame().then(() => {
+      newRef.startGame()
     });
+
+    setReferee(newRef)
 
     return true;
   }
@@ -143,7 +147,6 @@ function Arena() {
     });
   }, []);
 
-  const referee = new Referee(undefined, undefined, onMove);
 
   return (
     <Container maxWidth={false} sx={{ bgcolor: theme.palette.background.paper }}>
