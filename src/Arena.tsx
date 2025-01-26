@@ -13,6 +13,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Engines from './modules/engines';
+import { Referee } from './modules/referee';
 
 
 function Arena() {
@@ -55,37 +56,37 @@ function Arena() {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function Referee() {
-    setGameStarted(true);
-    for (let i = 1; i <= score.games; i++) {
-      let white_turn = true;
-      setGame(new Chess());
-      while (!game.isGameOver() && !game.isDraw()) {
-        const moves = game.moves();
-        white_turn ? console.log("Paizei o aspros") : console.log("Paizei o mauros");
+  // async function Referee() {
+  //   setGameStarted(true);
+  //   for (let i = 1; i <= score.games; i++) {
+  //     let white_turn = true;
+  //     setGame(new Chess());
+  //     while (!game.isGameOver() && !game.isDraw()) {
+  //       const moves = game.moves();
+  //       white_turn ? console.log("Paizei o aspros") : console.log("Paizei o mauros");
 
-        // Call the agent
-        i = 0;
-        //
+  //       // Call the agent
+  //       i = 0;
+  //       //
 
-        if (makeAMove(moves[i]) === null) {
-          white_turn ? setErrorState("WhiteIllegal") : setErrorState("BlackIlligal");
-        }
-        else {
-          setBoardPosition(game.fen())
-          await wait(delay * 1000);
-          white_turn = !white_turn;
-        }
-        // if(!gameStarted)
-        //   return;
-      }
-      if (game.isDraw() || game.isThreefoldRepetition())
-        updateScore('tie', 0.5);
-      else
-        white_turn ? updateScore('p1', 0) : updateScore('p2', 0);
-    }
-    setGameStarted(false);
-  }
+  //       if (makeAMove(moves[i]) === null) {
+  //         white_turn ? setErrorState("WhiteIllegal") : setErrorState("BlackIlligal");
+  //       }
+  //       else {
+  //         setBoardPosition(game.fen())
+  //         await wait(delay * 1000);
+  //         white_turn = !white_turn;
+  //       }
+  //       // if(!gameStarted)
+  //       //   return;
+  //     }
+  //     if (game.isDraw() || game.isThreefoldRepetition())
+  //       updateScore('tie', 0.5);
+  //     else
+  //       white_turn ? updateScore('p1', 0) : updateScore('p2', 0);
+  //   }
+  //   setGameStarted(false);
+  // }
 
   const updateScore = (target: string, val: number) => {
     if (target == 'p1')
@@ -119,8 +120,17 @@ function Arena() {
       setSelectErrors({ engine1: engine1 === "", engine2: engine2 === "" });
       return false;
     }
-    return true;
 
+    referee.setDelay = delay;
+    referee.initGame(engine1, engine2).then(() => {
+      referee.startGame();
+    });
+
+    return true;
+  }
+
+  const onMove = (move: string, fen: string) => {
+    setBoardPosition(fen);
   }
 
   useEffect(() => {
@@ -133,6 +143,7 @@ function Arena() {
     });
   }, []);
 
+  const referee = new Referee(undefined, undefined, onMove);
 
   return (
     <Container maxWidth={false} sx={{ bgcolor: theme.palette.background.paper }}>
@@ -140,7 +151,7 @@ function Arena() {
         <Grid container spacing={10} sx={{ padding: 2, }}>
           <Grid size={{ xs: 12, lg: 6 }}>
             <Box sx={{ backgroundColor: theme.palette.primary.dark, padding: 1, borderRadius: 4 }}>
-              <Chessboard position={boardPosition} arePiecesDraggable={false} />
+              <Chessboard position={boardPosition} isDraggablePiece={referee.onDragStart} />
             </Box>
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>
@@ -179,11 +190,14 @@ function Arena() {
                         disabled={gameStarted || !loaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine1(event.target.value); }}
                       >
+                        {loaded  && <MenuItem value="human">Human</MenuItem>}
+                        {loaded  && <MenuItem value="random">Random</MenuItem>}
                         {loaded && engineNames.map((engineName) => (
                           <MenuItem key={engineName} value={engineName}>
                             {engineName}
                           </MenuItem>
-                        ))}
+                        ))}  
+                        
                         {!loaded && <MenuItem value="Loading">Loading...</MenuItem>}
 
                       </Select>
@@ -201,11 +215,14 @@ function Arena() {
                         disabled={gameStarted || !loaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine2(event.target.value); }}
                       >
+                        {loaded  && <MenuItem value="human">Human</MenuItem>}
+                        {loaded  && <MenuItem value="random">Random</MenuItem>}
                         {loaded && engineNames.map((engineName) => (
                           <MenuItem key={engineName} value={engineName}>
                             {engineName}
                           </MenuItem>
-                        ))}
+                        ))}  
+                        
                         {!loaded && <MenuItem value="Loading">Loading...</MenuItem>}
                       </Select>
                     </FormControl>
@@ -265,7 +282,7 @@ function Arena() {
                             size='large'
                             sx={{ borderRadius: 5 }}
                             disabled={!loaded}
-                            onClick={() => { if (validateStart()) Referee(); }}
+                            onClick={() => {validateStart()}}
                           >
                             Play
                           </Button>
