@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Chessboard } from "react-chessboard";
 import Box from '@mui/material/Box'
-import { Button, Container, FormControl, FormHelperText, Stack, Typography } from '@mui/material';
+import { Button, Container, FormControl, Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Chess } from "chess.js";
 
@@ -12,7 +12,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Engines from './engines';
+import Engines from './modules/engines';
 
 
 function Arena() {

@@ -1,0 +1,9 @@
+
+interface gameState {
+    
+}
+
+
+class Referee {
+
+}
