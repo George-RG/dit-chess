@@ -40,56 +40,6 @@ function Arena() {
   const [game, setGame] = useState(new Chess());
   const [referee, setReferee] = useState(new Referee());
 
-
-  function makeAMove(move) {
-    const gameCopy = game;
-    const result = gameCopy.move(move);
-
-    if (result === null) {
-      console.log("Bro who made this trash?");
-    }
-    else {
-      setGame(gameCopy);
-    }
-    return result; // null if the move was illegal, the move object if the move was legal
-  }
-
-  function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  // async function Referee() {
-  //   setGameStarted(true);
-  //   for (let i = 1; i <= score.games; i++) {
-  //     let white_turn = true;
-  //     setGame(new Chess());
-  //     while (!game.isGameOver() && !game.isDraw()) {
-  //       const moves = game.moves();
-  //       white_turn ? console.log("Paizei o aspros") : console.log("Paizei o mauros");
-
-  //       // Call the agent
-  //       i = 0;
-  //       //
-
-  //       if (makeAMove(moves[i]) === null) {
-  //         white_turn ? setErrorState("WhiteIllegal") : setErrorState("BlackIlligal");
-  //       }
-  //       else {
-  //         setBoardPosition(game.fen())
-  //         await wait(delay * 1000);
-  //         white_turn = !white_turn;
-  //       }
-  //       // if(!gameStarted)
-  //       //   return;
-  //     }
-  //     if (game.isDraw() || game.isThreefoldRepetition())
-  //       updateScore('tie', 0.5);
-  //     else
-  //       white_turn ? updateScore('p1', 0) : updateScore('p2', 0);
-  //   }
-  //   setGameStarted(false);
-  // }
-
   const updateScore = (target: string, val: number) => {
     if (target == 'p1')
       setScore({ p1: score.p1 + 1, p2: score.p2, games: score.games })
@@ -133,7 +83,7 @@ function Arena() {
     return true;
   }
 
-  const onMove = (move: string, fen: string) => {
+  const onMove = (_: string, fen: string) => {
     setBoardPosition(fen);
   }
 
@@ -152,9 +102,12 @@ function Arena() {
     <Container maxWidth={false} sx={{ bgcolor: theme.palette.background.paper }}>
       <Box sx={{ flexGrow: 1, padding: 5, height: "100%" }}>
         <Grid container spacing={10} sx={{ padding: 2, }}>
-          <Grid size={{ xs: 12, lg: 6 }}>
-            <Box sx={{ backgroundColor: theme.palette.primary.dark, padding: 1, borderRadius: 4 }}>
-              <Chessboard position={boardPosition} isDraggablePiece={referee.onDragStart} />
+          <Grid size={{ xs: 12, lg: 6 }} alignContent='center' alignItems='center'>
+            <Box width="100%" justifyContent='center' alignContent='center' display='flex'>
+              <Box width="90%" sx={{ backgroundColor: theme.palette.primary.dark, padding: 1, borderRadius: 4 }}>
+                {!referee.gameStarted && <Chessboard position={boardPosition} arePiecesDraggable={false} />}
+                {referee.gameStarted && <Chessboard position={boardPosition} isDraggablePiece={referee.onDragStart} onPieceDrop={referee.onDrop} />}
+              </Box>
             </Box>
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>
@@ -178,7 +131,7 @@ function Arena() {
 
               <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', padding: 4, borderRadius: 5 }}>
                 <Typography variant="h5">Game Status: {gameStarted ? "Game in Progress" : "Game Stopped"}</Typography>
-              </Box> 
+              </Box>
 
               <Box sx={{ bgcolor: theme.palette.background.paper, border: 'solid 2px', borderColor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: 10, paddingY: 5, borderRadius: 5, marginLeft: "10%" }}>
                 <Grid container columnSpacing={1} rowSpacing={5}>
@@ -193,14 +146,14 @@ function Arena() {
                         disabled={gameStarted || !loaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine1(event.target.value); }}
                       >
-                        {loaded  && <MenuItem value="human">Human</MenuItem>}
-                        {loaded  && <MenuItem value="random">Random</MenuItem>}
+                        {loaded && <MenuItem value="human">Human</MenuItem>}
+                        {loaded && <MenuItem value="random">Random</MenuItem>}
                         {loaded && engineNames.map((engineName) => (
                           <MenuItem key={engineName} value={engineName}>
                             {engineName}
                           </MenuItem>
-                        ))}  
-                        
+                        ))}
+
                         {!loaded && <MenuItem value="Loading">Loading...</MenuItem>}
 
                       </Select>
@@ -218,14 +171,14 @@ function Arena() {
                         disabled={gameStarted || !loaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine2(event.target.value); }}
                       >
-                        {loaded  && <MenuItem value="human">Human</MenuItem>}
-                        {loaded  && <MenuItem value="random">Random</MenuItem>}
+                        {loaded && <MenuItem value="human">Human</MenuItem>}
+                        {loaded && <MenuItem value="random">Random</MenuItem>}
                         {loaded && engineNames.map((engineName) => (
                           <MenuItem key={engineName} value={engineName}>
                             {engineName}
                           </MenuItem>
-                        ))}  
-                        
+                        ))}
+
                         {!loaded && <MenuItem value="Loading">Loading...</MenuItem>}
                       </Select>
                     </FormControl>
@@ -285,7 +238,7 @@ function Arena() {
                             size='large'
                             sx={{ borderRadius: 5 }}
                             disabled={!loaded}
-                            onClick={() => {validateStart()}}
+                            onClick={() => { validateStart() }}
                           >
                             Play
                           </Button>

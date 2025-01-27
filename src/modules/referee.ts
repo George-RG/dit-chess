@@ -31,7 +31,7 @@ const randomEngine = async function (_: string, possibleMoves: string[]): Promis
 const build_engine = (wasm: WebAssembly.WebAssemblyInstantiatedSource, timeout: number) => {
     return async (boardState: string, possibleMoves: string[]): Promise<number> => {
         return new Promise<number>((resolve, reject) => {
-            const memory = new Uint8Array((wasm.instance.exports["memory"] as WebAssembly.Memory).buffer) 
+            const memory = new Uint8Array((wasm.instance.exports["memory"] as WebAssembly.Memory).buffer)
             for (let i = 0; i < boardState.length; i++) {
                 memory[i] = boardState.charCodeAt(i)
             }
@@ -47,8 +47,8 @@ const build_engine = (wasm: WebAssembly.WebAssemblyInstantiatedSource, timeout: 
             }, timeout * 1000 + 100)
 
             try {
-                const moveIndex = (wasm.instance.exports["choose_move"] as (arg1: number,arg2: number,arg3: number) => number)(0, boardState.length + 1, timeout)
-        
+                const moveIndex = (wasm.instance.exports["choose_move"] as (arg1: number, arg2: number, arg3: number) => number)(0, boardState.length + 1, timeout)
+
                 resolve(moveIndex)
             } catch (e) {
                 reject(e)
@@ -84,29 +84,35 @@ export class Referee {
     }
 
     // Method to pass to the chessboard component
-    onDragStart: (args:{piece: Piece, sourceSquare: Square}) => boolean = (args) => {
-        
-        if(!this.gameStarted) return false;
-        return true;
-        
+    onDragStart: (args: { piece: Piece, sourceSquare: Square }) => boolean = (args) => {
         if (this.state.game.isGameOver() === true ||
-            (this.state.game.turn() === 'w' && args.piece.search(/^b/) !== -1) ||
-            (this.state.game.turn() === 'b' && args.piece.search(/^w/) !== -1)) {
+            (this.state.game.turn() === 'w' && args.piece.search(/^b/) !== -1 && this.state.whiteEngineSource === 'human') ||
+            (this.state.game.turn() === 'b' && args.piece.search(/^w/) !== -1 && this.state.blackEngineSource === 'human')) {
             return false;
         }
         return true;
     }
 
-    onDrop(source: string, target: string) {
-        const move = this.state.game.move({
-            from: source,
-            to: target,
-            promotion: 'q' // NOTE: always promote to a queen for example simplicity
-        });
+    onDrop: (source: string, target: string) => boolean = (source: string, target: string) => {
+        try {
+            const move = this.state.game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            });
 
-        if (move === null) return 'snapback';
+            if (move === null) return false;
 
-        this.onMove(move.san, this.state.game.fen());
+            this.onMove(move.san, this.state.game.fen());
+            // setTimeout(() => {
+            //     this.gameDriver();
+            // }, this.state.moveInterval * 1000);
+            this.gameDriver();
+            return true;
+        }
+        catch {
+            return false;
+        }
     }
 
     set setDelay(delay: number) {
@@ -140,10 +146,10 @@ export class Referee {
         if (this.state.blackEngineSource.endsWith('.wasm')) {
             promises.push(WebAssembly.instantiateStreaming(fetch(`engines/${this.state.blackEngineSource}`), importObject))
         }
-        
+
         if (this.state.whiteEngineSource === 'random') {
             this.state.whiteEngineMove = randomEngine
-        } 
+        }
 
         if (this.state.blackEngineSource === 'random') {
             this.state.blackEngineMove = randomEngine
@@ -176,18 +182,18 @@ export class Referee {
     async gameDriver() {
         this.state.whiteToPlay = !this.state.whiteToPlay;
 
-        if(this.state.game.isGameOver()){
-            if(this.state.game.isCheckmate()){
+        if (this.state.game.isGameOver()) {
+            if (this.state.game.isCheckmate()) {
                 console.log("Checkmate!")
-            }else if(this.state.game.isDraw()){
+            } else if (this.state.game.isDraw()) {
                 console.log("Draw!")
             }
             return;
         }
-        
-        if(this.state.whiteToPlay && this.state.whiteEngineSource === 'human'
+
+        if (this.state.whiteToPlay && this.state.whiteEngineSource === 'human'
             || !this.state.whiteToPlay && this.state.blackEngineSource === 'human'
-        ){
+        ) {
             console.log("Human's turn")
             return;
         }
@@ -201,7 +207,7 @@ export class Referee {
             return -1;
         });
 
-        if(moveIndex === -1){
+        if (moveIndex === -1) {
             return;
         }
 
