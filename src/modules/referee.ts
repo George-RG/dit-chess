@@ -20,6 +20,13 @@ interface gameState {
     moveInterval: number;
 }
 
+interface gameStatus {
+    gameLoading: boolean;
+    gameReady: boolean;
+    gameStarted: boolean;
+    gamePaused: boolean;
+}
+
 // Random engine for testing - we gotta beat this!
 const randomEngine = async function (_: string, possibleMoves: string[]): Promise<number> {
     return new Promise<number>((resolve, _) => {
@@ -65,8 +72,7 @@ export class Referee {
 
     onMove: (move: string, newBoardFen: string) => void;
 
-    gameStarted: boolean = false;
-    gameReady: boolean = false;
+    status: gameStatus;
 
     constructor(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void, delay?: number) {
         this.state = {
@@ -79,6 +85,13 @@ export class Referee {
             timeout: 5,
             moveInterval: delay || 1,
         };
+
+        this.status = {
+            gameLoading: false,
+            gameReady: false,
+            gameStarted: false,
+            gamePaused: false,
+        }
 
         this.onMove = onMove || function () { };
     }
@@ -104,9 +117,6 @@ export class Referee {
             if (move === null) return false;
 
             this.onMove(move.san, this.state.game.fen());
-            // setTimeout(() => {
-            //     this.gameDriver();
-            // }, this.state.moveInterval * 1000);
             this.gameDriver();
             return true;
         }
@@ -119,8 +129,8 @@ export class Referee {
         this.state.moveInterval = delay;
     }
 
-    async initGame(whiteEngine?: string, blackEngine?: string) {
-        if (this.gameStarted) return;
+    async initGame(whiteEngine?: string, blackEngine?: string, delay?: number, onMove?:(move: string, newBoardFen: string) => void) {
+        if (this.status.gameStarted) return;
 
         if (!whiteEngine && this.state.whiteEngineSource === '') {
             throw new Error('No white engine provided');
@@ -136,6 +146,14 @@ export class Referee {
 
         if (blackEngine) {
             this.state.blackEngineSource = blackEngine;
+        }
+
+        if (delay){
+            this.state.moveInterval = delay;
+        }
+
+        if (onMove){
+            this.onMove = onMove;
         }
 
         const promises = []
@@ -168,14 +186,14 @@ export class Referee {
             }
 
             // Start the game loop
-            this.gameReady = true;
+            this.status.gameReady = true;
         })
     }
 
     startGame() {
-        if (!this.gameReady) return;
+        if (!this.status.gameReady) return;
 
-        this.gameStarted = true;
+        this.status.gameStarted = true;
         this.gameDriver();
     }
 

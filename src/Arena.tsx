@@ -19,6 +19,7 @@ import { Referee } from './modules/referee';
 function Arena() {
   const theme = useTheme();
   const engines = new Engines();
+  const referee = new Referee();
 
   const [engine1, setEngine1] = useState<string>('Loading');
   const [engine2, setEngine2] = useState<string>('Loading');
@@ -36,9 +37,6 @@ function Arena() {
 
   const [score, setScore] = useState({ p1: 0, p2: 0, games: 1 });
   const [delay, setDelay] = useState(0);
-
-  const [game, setGame] = useState(new Chess());
-  const [referee, setReferee] = useState(new Referee());
 
   const updateScore = (target: string, val: number) => {
     if (target == 'p1')
@@ -73,12 +71,9 @@ function Arena() {
       return false;
     }
 
-    const newRef = new Referee(engine1, engine2, onMove, delay);
-    newRef.initGame().then(() => {
-      newRef.startGame()
-    });
-
-    setReferee(newRef)
+    referee.initGame(engine1, engine2, delay, onMove).then(()=>{
+      referee.startGame()
+    })
 
     return true;
   }
@@ -105,8 +100,8 @@ function Arena() {
           <Grid size={{ xs: 12, lg: 6 }} alignContent='center' alignItems='center'>
             <Box width="100%" justifyContent='center' alignContent='center' display='flex'>
               <Box width="90%" sx={{ backgroundColor: theme.palette.primary.dark, padding: 1, borderRadius: 4 }}>
-                {!referee.gameStarted && <Chessboard position={boardPosition} arePiecesDraggable={false} />}
-                {referee.gameStarted && <Chessboard position={boardPosition} isDraggablePiece={referee.onDragStart} onPieceDrop={referee.onDrop} />}
+                {!referee.status.gameStarted && <Chessboard position={boardPosition} arePiecesDraggable={false} />}
+                {referee.status.gameStarted && <Chessboard position={boardPosition} isDraggablePiece={referee.onDragStart} onPieceDrop={referee.onDrop} />}
               </Box>
             </Box>
           </Grid>
