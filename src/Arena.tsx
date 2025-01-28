@@ -25,7 +25,7 @@ function Arena() {
   const [engine2, setEngine2] = useState<string>('Loading');
   const [engineNames, setEngineNames] = useState<string[]>([]);
 
-  const [loaded, setLoaded] = useState(false);
+  const [enginesLoaded, setEnginesLoaded] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
 
   const [selectErrors, setSelectErrors] = useState({ engine1: false, engine2: false });
@@ -71,7 +71,7 @@ function Arena() {
       return false;
     }
 
-    referee.initGame(engine1, engine2, delay, onMove).then(()=>{
+    referee.initGame(engine1, engine2, delay, onMove).then(() => {
       referee.startGame()
     })
 
@@ -88,7 +88,7 @@ function Arena() {
       setEngineNames(engines.getEngineNames());
       setEngine1('');
       setEngine2('');
-      setLoaded(true);
+      setEnginesLoaded(true);
     });
   }, []);
 
@@ -138,18 +138,18 @@ function Arena() {
                         id="Player1-box"
                         label="Player 1"
                         value={engine1}
-                        disabled={gameStarted || !loaded}
+                        disabled={gameStarted || !enginesLoaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine1(event.target.value); }}
                       >
-                        {loaded && <MenuItem value="human">Human</MenuItem>}
-                        {loaded && <MenuItem value="random">Random</MenuItem>}
-                        {loaded && engineNames.map((engineName) => (
+                        {enginesLoaded && <MenuItem value="human">Human</MenuItem>}
+                        {enginesLoaded && <MenuItem value="random">Random</MenuItem>}
+                        {enginesLoaded && engineNames.map((engineName) => (
                           <MenuItem key={engineName} value={engineName}>
                             {engineName}
                           </MenuItem>
                         ))}
 
-                        {!loaded && <MenuItem value="Loading">Loading...</MenuItem>}
+                        {!enginesLoaded && <MenuItem value="Loading">Loading...</MenuItem>}
 
                       </Select>
                     </FormControl>
@@ -163,18 +163,18 @@ function Arena() {
                         id="Player2"
                         label="Player 2"
                         value={engine2}
-                        disabled={gameStarted || !loaded}
+                        disabled={gameStarted || !enginesLoaded}
                         onChange={(event: SelectChangeEvent<string>) => { changeEngine2(event.target.value); }}
                       >
-                        {loaded && <MenuItem value="human">Human</MenuItem>}
-                        {loaded && <MenuItem value="random">Random</MenuItem>}
-                        {loaded && engineNames.map((engineName) => (
+                        {enginesLoaded && <MenuItem value="human">Human</MenuItem>}
+                        {enginesLoaded && <MenuItem value="random">Random</MenuItem>}
+                        {enginesLoaded && engineNames.map((engineName) => (
                           <MenuItem key={engineName} value={engineName}>
                             {engineName}
                           </MenuItem>
                         ))}
 
-                        {!loaded && <MenuItem value="Loading">Loading...</MenuItem>}
+                        {!enginesLoaded && <MenuItem value="Loading">Loading...</MenuItem>}
                       </Select>
                     </FormControl>
                   </Grid>
@@ -226,13 +226,66 @@ function Arena() {
                     <Stack direction="column" spacing={1}>
                       <FormControlLabel disabled control={<Checkbox />} label="Log Results" />
                       {/* Play button */}
+                      {!referee.status.gameStarted &&
+                        <Button
+                          variant="contained"
+                          size='large'
+                          sx={{ borderRadius: 5 }}
+                          disabled={!enginesLoaded || referee.status.gameLoading}
+                          onClick={() => { validateStart() }}
+                        >
+                          {!enginesLoaded || referee.status.gameLoading ? "Loading..." : "Play"}
+                        </Button>
+                      }
+                      {referee.status.gameStarted &&
+                        <Grid container spacing={2}>
+                          {referee.status.gamePaused ?
+                            <Grid size={{ xs: 12, lg: 6 }}>
+                              <Button
+                                variant="contained"
+                                size='large'
+                                fullWidth
+                                sx={{ borderRadius: 5, backgroundColor: theme.palette.warning.main }}
+                                onClick={() => { referee.pauseGame(); }}
+                              >
+                                Pause Game
+                              </Button>
+                            </Grid>
+                            :
+                            <Grid size={{ xs: 12, lg: 6 }}>
+                              <Button
+                                variant="contained"
+                                size='large'
+                                fullWidth
+                                sx={{ borderRadius: 5, backgroundColor: theme.palette.primary.main }}
+                                onClick={() => { resumeGame(); }}
+                              >
+                                Resume
+                              </Button>
+                            </Grid>
+                          }
+                          <Grid size={{ xs: 12, lg: 6 }}>
+                            <Button
+                              variant="contained"
+                              size='large'
+                              fullWidth
+                              sx={{ borderRadius: 5, backgroundColor: theme.palette.error.main }}
+                              disabled={!enginesLoaded}
+                              onClick={() => { setGameStarted(false); }}
+                            >
+                              Stop Game
+                            </Button>
+                          </Grid>
+                        </Grid>
+                      }
+
                       {
                         !gameStarted ?
                           <Button
                             variant="contained"
                             size='large'
                             sx={{ borderRadius: 5 }}
-                            disabled={!loaded}
+                            disabled={!enginesLoaded}
                             onClick={() => { validateStart() }}
                           >
                             Play
@@ -245,7 +298,7 @@ function Arena() {
                                 size='large'
                                 fullWidth
                                 sx={{ borderRadius: 5, backgroundColor: theme.palette.warning.main }}
-                                disabled={!loaded}
+                                disabled={!enginesLoaded}
                                 onClick={() => { setStopGame(true); }}
                               >
                                 Pause Game
@@ -257,7 +310,7 @@ function Arena() {
                                 size='large'
                                 fullWidth
                                 sx={{ borderRadius: 5, backgroundColor: theme.palette.error.main }}
-                                disabled={!loaded}
+                                disabled={!enginesLoaded}
                                 onClick={() => { setGameStarted(false); }}
                               >
                                 Stop Game

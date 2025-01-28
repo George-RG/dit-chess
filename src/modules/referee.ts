@@ -25,6 +25,7 @@ interface gameStatus {
     gameReady: boolean;
     gameStarted: boolean;
     gamePaused: boolean;
+    gameEnded: boolean;
 }
 
 // Random engine for testing - we gotta beat this!
@@ -91,6 +92,7 @@ export class Referee {
             gameReady: false,
             gameStarted: false,
             gamePaused: false,
+            gameEnded: false,
         }
 
         this.onMove = onMove || function () { };
@@ -130,7 +132,8 @@ export class Referee {
     }
 
     async initGame(whiteEngine?: string, blackEngine?: string, delay?: number, onMove?:(move: string, newBoardFen: string) => void) {
-        if (this.status.gameStarted) return;
+        if (this.status.gameStarted || this.status.gameLoading) return;
+        this.status.gameLoading = true;
 
         if (!whiteEngine && this.state.whiteEngineSource === '') {
             throw new Error('No white engine provided');
@@ -193,11 +196,30 @@ export class Referee {
     startGame() {
         if (!this.status.gameReady) return;
 
+        this.gameDriver();
+        this.status.gameLoading = false;
+        this.status.gamePaused = false;
+        this.status.gameLoading = false;
+        this.status.gameEnded =false;
         this.status.gameStarted = true;
+    }
+
+    pauseGame(){
+        if (!this.status.gameStarted) return
+
+        this.status.gamePaused = true;
+    }
+
+    resumeGame(){
+        if (!this.status.gameStarted) return
+
+        this.status.gamePaused = false;
         this.gameDriver();
     }
 
     async gameDriver() {
+        if(this.status.gamePaused || this.status.gameEnded) return;
+
         this.state.whiteToPlay = !this.state.whiteToPlay;
 
         if (this.state.game.isGameOver()) {
@@ -206,6 +228,7 @@ export class Referee {
             } else if (this.state.game.isDraw()) {
                 console.log("Draw!")
             }
+            this.status.gameEnded = true;
             return;
         }
 
@@ -226,6 +249,11 @@ export class Referee {
         });
 
         if (moveIndex === -1) {
+            return;
+        }
+
+        if(this.status.gamePaused) {
+            this.state.whiteToPlay = !this.state.whiteToPlay
             return;
         }
 
