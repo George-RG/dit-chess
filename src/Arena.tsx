@@ -16,7 +16,7 @@ import { Referee, gameStatus } from './modules/referee';
 
 function Arena() {
   const theme = useTheme();
-  const [engines, setEngines] = useState(new Engines());
+  const [engines, _] = useState(new Engines());
   const [referee, setReferee] = useState(new Referee());
   
 
