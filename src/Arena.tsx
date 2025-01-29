@@ -258,7 +258,7 @@ function Arena() {
                                 size='large'
                                 fullWidth
                                 sx={{ borderRadius: 5, backgroundColor: theme.palette.primary.main }}
-                                onClick={() => { resumeGame(); }}
+                                onClick={() => { referee.resumeGame(); }}
                               >
                                 Resume
                               </Button>
