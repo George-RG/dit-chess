@@ -342,8 +342,13 @@ export class Referee {
         this.state.game.move(possibleMoves[moveIndex]);
         this.onMove(possibleMoves[moveIndex], this.state.game.fen());
         // Wait for the next move
-        setTimeout(() => {
+        if(this.state.moveInterval > 0)
+        {
+            setTimeout(() => {
+                this.gameDriver();
+            }, this.state.moveInterval * 1000);
+        } else {
             this.gameDriver();
-        }, this.state.moveInterval * 1000);
+        }
     }
 }
