@@ -323,7 +323,7 @@ export class Referee {
                     gamePaused: false,
                     gameReady: false,
                 });
-                return;
+                return -1;
             }
 
             console.error(err)
