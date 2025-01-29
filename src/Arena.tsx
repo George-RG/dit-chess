@@ -3,7 +3,6 @@ import { Chessboard } from "react-chessboard";
 import Box from '@mui/material/Box'
 import { Button, Container, FormControl, Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { Chess } from "chess.js";
 
 import { useTheme } from '@mui/material/styles';
 
@@ -13,28 +12,28 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Engines from './modules/engines';
-import { Referee } from './modules/referee';
-
+import { Referee, gameStatus } from './modules/referee';
 
 function Arena() {
   const theme = useTheme();
-  const engines = new Engines();
-  const referee = new Referee();
+  const [engines, setEngines] = useState(new Engines());
+  const [referee, setReferee] = useState(new Referee());
+  
 
   const [engine1, setEngine1] = useState<string>('Loading');
   const [engine2, setEngine2] = useState<string>('Loading');
   const [engineNames, setEngineNames] = useState<string[]>([]);
 
   const [enginesLoaded, setEnginesLoaded] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameLoading, setGameLoading] = useState(referee.status.gameLoading);
+  const [gameReady, setGameReady] = useState(referee.status.gameReady);
+  const [gameStarted, setGameStarted] = useState(referee.status.gameStarted);
+  const [gamePaused, setGamePaused] = useState(referee.status.gamePaused);
+  const [gameEnded, setGameEnded] = useState(referee.status.gameEnded);
 
   const [selectErrors, setSelectErrors] = useState({ engine1: false, engine2: false });
 
-
   const [boardPosition, setBoardPosition] = useState("start");
-  const [errorState, setErrorState] = useState("None");
-  const [stopGame, setStopGame] = useState(false);
-
   const [score, setScore] = useState({ p1: 0, p2: 0, games: 1 });
   const [delay, setDelay] = useState(0);
 
@@ -71,8 +70,10 @@ function Arena() {
       return false;
     }
 
-    referee.initGame(engine1, engine2, delay, onMove).then(() => {
-      referee.startGame()
+    const newRef = new Referee(engine1, engine2, onMove, delay, onStatusChange);
+    setReferee(newRef);
+    newRef.initGame().then(() => {
+      newRef.startGame();
     })
 
     return true;
@@ -92,6 +93,13 @@ function Arena() {
     });
   }, []);
 
+  const onStatusChange = (status: gameStatus) => {
+    setGameLoading(status.gameLoading);
+    setGameReady(status.gameReady);
+    setGameStarted(status.gameStarted);
+    setGamePaused(status.gamePaused);
+    setGameEnded(status.gameEnded);
+  }
 
   return (
     <Container maxWidth={false} sx={{ bgcolor: theme.palette.background.paper }}>
@@ -110,7 +118,7 @@ function Arena() {
               <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: 10, paddingY: 5, borderRadius: 5 }}>
                 <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center' }}>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Typography variant="h5">{engine1 === "" ? "Player 1" : engine1}</Typography>
+                    <Typography variant="h5">{engine1 === "" ? "Player 1" : engine1.split(".wasm")[0]}</Typography>
                     <Typography variant="h2">{score.p1}</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
@@ -118,14 +126,21 @@ function Arena() {
                     <Typography variant="h4">VS</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Typography variant="h5">{engine2 === "" ? "Player 2" : engine2}</Typography>
+                    <Typography variant="h5">{engine2 === "" ? "Player 2" : engine2.split(".wasm")[0]}</Typography>
                     <Typography variant="h2">{score.p2}</Typography>
                   </Box>
                 </Stack>
               </Box>
 
               <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', padding: 4, borderRadius: 5 }}>
-                <Typography variant="h5">Game Status: {gameStarted ? "Game in Progress" : "Game Stopped"}</Typography>
+                <Typography variant="h5">
+                  Game Status: 
+                  {gamePaused && "Game Paused"}
+                  {gameEnded && "Not playing"}
+                  {gameReady && "Getting Ready..."}
+                  {gameLoading && "Loading..."}
+                  {gameStarted && "Game Running"}
+                </Typography>
               </Box>
 
               <Box sx={{ bgcolor: theme.palette.background.paper, border: 'solid 2px', borderColor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: 10, paddingY: 5, borderRadius: 5, marginLeft: "10%" }}>
@@ -144,7 +159,7 @@ function Arena() {
                         {enginesLoaded && <MenuItem value="human">Human</MenuItem>}
                         {enginesLoaded && <MenuItem value="random">Random</MenuItem>}
                         {enginesLoaded && engineNames.map((engineName) => (
-                          <MenuItem key={engineName} value={engineName}>
+                          <MenuItem key={engineName} value={engineName + ".wasm"}>
                             {engineName}
                           </MenuItem>
                         ))}
@@ -169,7 +184,7 @@ function Arena() {
                         {enginesLoaded && <MenuItem value="human">Human</MenuItem>}
                         {enginesLoaded && <MenuItem value="random">Random</MenuItem>}
                         {enginesLoaded && engineNames.map((engineName) => (
-                          <MenuItem key={engineName} value={engineName}>
+                          <MenuItem key={engineName} value={engineName + ".wasm"}>
                             {engineName}
                           </MenuItem>
                         ))}
@@ -226,20 +241,20 @@ function Arena() {
                     <Stack direction="column" spacing={1}>
                       <FormControlLabel disabled control={<Checkbox />} label="Log Results" />
                       {/* Play button */}
-                      {!referee.status.gameStarted &&
+                      {!gameStarted &&
                         <Button
                           variant="contained"
                           size='large'
                           sx={{ borderRadius: 5 }}
-                          disabled={!enginesLoaded || referee.status.gameLoading}
+                          disabled={!enginesLoaded || gameLoading}
                           onClick={() => { validateStart() }}
                         >
-                          {!enginesLoaded || referee.status.gameLoading ? "Loading..." : "Play"}
+                          {!enginesLoaded || gameLoading ? "Loading..." : "Play"}
                         </Button>
                       }
-                      {referee.status.gameStarted &&
+                      {gameStarted &&
                         <Grid container spacing={2}>
-                          {referee.status.gamePaused ?
+                          {!gamePaused ?
                             <Grid size={{ xs: 12, lg: 6 }}>
                               <Button
                                 variant="contained"
@@ -270,55 +285,13 @@ function Arena() {
                               size='large'
                               fullWidth
                               sx={{ borderRadius: 5, backgroundColor: theme.palette.error.main }}
-                              disabled={!enginesLoaded}
-                              onClick={() => { setGameStarted(false); }}
+                              onClick={() => { referee.stopGame(); }}
                             >
                               Stop Game
                             </Button>
                           </Grid>
                         </Grid>
                       }
-
-                      {
-                        !gameStarted ?
-                          <Button
-                            variant="contained"
-                            size='large'
-                            sx={{ borderRadius: 5 }}
-                            disabled={!enginesLoaded}
-                            onClick={() => { validateStart() }}
-                          >
-                            Play
-                          </Button>
-                          :
-                          <Grid container spacing={2}>
-                            <Grid size={{ xs: 6 }}>
-                              <Button
-                                variant="contained"
-                                size='large'
-                                fullWidth
-                                sx={{ borderRadius: 5, backgroundColor: theme.palette.warning.main }}
-                                disabled={!enginesLoaded}
-                                onClick={() => { setStopGame(true); }}
-                              >
-                                Pause Game
-                              </Button>
-                            </Grid>
-                            <Grid size={{ xs: 6 }}>
-                              <Button
-                                variant="contained"
-                                size='large'
-                                fullWidth
-                                sx={{ borderRadius: 5, backgroundColor: theme.palette.error.main }}
-                                disabled={!enginesLoaded}
-                                onClick={() => { setGameStarted(false); }}
-                              >
-                                Stop Game
-                              </Button>
-                            </Grid>
-                          </Grid>
-                      }
-
                     </Stack>
                   </Grid>
 

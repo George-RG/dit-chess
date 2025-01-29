@@ -4,9 +4,11 @@ import { Piece, Square } from "react-chessboard/dist/chessboard/types";
 const importObject = {
     env: {
         __memory_base: 0,
+        abort: () => { throw new Error("abort") }
     }
 };
-interface gameState {
+
+export interface gameState {
     whiteEngineSource: string;
     blackEngineSource: string;
 
@@ -20,12 +22,12 @@ interface gameState {
     moveInterval: number;
 }
 
-interface gameStatus {
-    gameLoading: boolean;
-    gameReady: boolean;
-    gameStarted: boolean;
-    gamePaused: boolean;
-    gameEnded: boolean;
+export interface gameStatus {
+    gameLoading?: boolean;
+    gameReady?: boolean;
+    gameStarted?: boolean;
+    gamePaused?: boolean;
+    gameEnded?: boolean;
 }
 
 // Random engine for testing - we gotta beat this!
@@ -72,10 +74,11 @@ export class Referee {
     state: gameState;
 
     onMove: (move: string, newBoardFen: string) => void;
+    onStatusChange: (status: gameStatus) => void;
 
     status: gameStatus;
 
-    constructor(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void, delay?: number) {
+    constructor(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void, delay?: number, onStatusChange?: (status: gameStatus) => void) {
         this.state = {
             whiteEngineSource: whiteEngine || '',
             blackEngineSource: blackEngine || '',
@@ -92,10 +95,35 @@ export class Referee {
             gameReady: false,
             gameStarted: false,
             gamePaused: false,
-            gameEnded: false,
+            gameEnded: true,
         }
 
         this.onMove = onMove || function () { };
+        this.onStatusChange = onStatusChange || function () { };
+    }
+
+    updateStatus(newStatus: gameStatus) {
+        if (newStatus.gameEnded !== undefined) {
+            this.status.gameEnded = newStatus.gameEnded;
+        }
+
+        if (newStatus.gameLoading !== undefined) {
+            this.status.gameLoading = newStatus.gameLoading;
+        }
+
+        if (newStatus.gamePaused !== undefined) {
+            this.status.gamePaused = newStatus.gamePaused;
+        }
+
+        if (newStatus.gameReady !== undefined) {
+            this.status.gameReady = newStatus.gameReady;
+        }
+
+        if (newStatus.gameStarted !== undefined) {
+            this.status.gameStarted = newStatus.gameStarted;
+        }
+
+        this.onStatusChange(this.status);
     }
 
     // Method to pass to the chessboard component
@@ -133,7 +161,7 @@ export class Referee {
 
     async initGame(whiteEngine?: string, blackEngine?: string, delay?: number, onMove?:(move: string, newBoardFen: string) => void) {
         if (this.status.gameStarted || this.status.gameLoading) return;
-        this.status.gameLoading = true;
+        this.updateStatus({ gameLoading: true });
 
         if (!whiteEngine && this.state.whiteEngineSource === '') {
             throw new Error('No white engine provided');
@@ -146,7 +174,7 @@ export class Referee {
         if (whiteEngine) {
             this.state.whiteEngineSource = whiteEngine;
         }
-
+        
         if (blackEngine) {
             this.state.blackEngineSource = blackEngine;
         }
@@ -154,68 +182,100 @@ export class Referee {
         if (delay){
             this.state.moveInterval = delay;
         }
-
+        
         if (onMove){
             this.onMove = onMove;
         }
-
+                
         const promises = []
         if (this.state.whiteEngineSource.endsWith('.wasm')) {
-            promises.push(WebAssembly.instantiateStreaming(fetch(`engines/${this.state.whiteEngineSource}`), importObject))
+            try
+            {
+                const wasmPromise = WebAssembly.instantiateStreaming(fetch(`/engines/${this.state.whiteEngineSource}`), importObject)
+                promises.push(wasmPromise)   
+            } catch (e) {
+                console.error(e)
+            }                     
+        } else if (this.state.whiteEngineSource === 'random') {
+            this.state.whiteEngineMove = randomEngine
+        } else if (this.state.whiteEngineSource === 'human') {
+            // Do nothing
+        } else {
+            throw new Error('Invalid white engine source');
         }
 
         if (this.state.blackEngineSource.endsWith('.wasm')) {
-            promises.push(WebAssembly.instantiateStreaming(fetch(`engines/${this.state.blackEngineSource}`), importObject))
-        }
-
-        if (this.state.whiteEngineSource === 'random') {
-            this.state.whiteEngineMove = randomEngine
-        }
-
-        if (this.state.blackEngineSource === 'random') {
+            try
+            {
+                const wasmPromise = WebAssembly.instantiateStreaming(fetch(`/engines/${this.state.blackEngineSource}`), importObject)
+                promises.push(wasmPromise)   
+            } catch (e) {
+                console.error(e)
+            }                     
+        } else if (this.state.blackEngineSource === 'random') {
             this.state.blackEngineMove = randomEngine
+        } else if (this.state.blackEngineSource === 'human') {
+            // Do nothing
+        } else {
+            throw new Error('Invalid black engine source');
         }
 
         // Fetch all engines and then start the game(s)
-        Promise.all(promises).then(wasms => {
-            var engine_index = 0
-            if (this.state.whiteEngineSource.endsWith('.wasm')) {
-                this.state.whiteEngineMove = build_engine(wasms[engine_index], this.state.timeout)
-                engine_index += 1
-            }
-            if (this.state.blackEngineSource.endsWith('.wasm')) {
-                this.state.blackEngineMove = build_engine(wasms[engine_index], this.state.timeout)
-                engine_index += 1
-            }
+        const wasms = await Promise.all(promises)
+        var engine_index = 0
+        if (this.state.whiteEngineSource.endsWith('.wasm')) {
+            this.state.whiteEngineMove = build_engine(wasms[engine_index], this.state.timeout)
+            engine_index += 1
+        }
+        if (this.state.blackEngineSource.endsWith('.wasm')) {
+            this.state.blackEngineMove = build_engine(wasms[engine_index], this.state.timeout)
+            engine_index += 1
+        }
 
-            // Start the game loop
-            this.status.gameReady = true;
-        })
+        this.updateStatus({ gameReady: true });
     }
 
     startGame() {
         if (!this.status.gameReady) return;
 
+        this.updateStatus({
+            gameStarted: true,
+            gamePaused: false,
+            gameEnded: false,
+            gameLoading: false,
+            gameReady: false
+        })
         this.gameDriver();
-        this.status.gameLoading = false;
-        this.status.gamePaused = false;
-        this.status.gameLoading = false;
-        this.status.gameEnded =false;
-        this.status.gameStarted = true;
     }
 
     pauseGame(){
         if (!this.status.gameStarted) return
 
-        this.status.gamePaused = true;
+        this.updateStatus({ gamePaused: true });
     }
 
     resumeGame(){
         if (!this.status.gameStarted) return
 
-        this.status.gamePaused = false;
+        this.updateStatus({ gamePaused: false });
         this.gameDriver();
     }
+
+    stopGame(){
+        if (!this.status.gameStarted) return
+
+        this.updateStatus({
+            gameStarted: false,
+            gamePaused: false,
+            gameEnded: true,
+            gameLoading: false,
+            gameReady: false
+        })
+
+        this.state.game.reset();
+        this.onMove('', this.state.game.fen());
+    }
+
 
     async gameDriver() {
         if(this.status.gamePaused || this.status.gameEnded) return;
@@ -228,7 +288,12 @@ export class Referee {
             } else if (this.state.game.isDraw()) {
                 console.log("Draw!")
             }
-            this.status.gameEnded = true;
+            this.updateStatus({ 
+                gameEnded: true,
+                gameStarted: false,
+                gamePaused: false,
+                gameReady: false,
+            });
             return;
         }
 
@@ -244,6 +309,23 @@ export class Referee {
 
         const moveFunc = this.state.whiteToPlay ? this.state.whiteEngineMove : this.state.blackEngineMove;
         const moveIndex = await moveFunc(boardState, possibleMoves).catch((err) => {
+            if(err.message === "Timeout") {
+                if(this.state.whiteToPlay){
+                    console.log("White engine timed out")
+                }
+                else{
+                    console.log("Black engine timed out")
+                }
+
+                this.updateStatus({
+                    gameEnded: true,
+                    gameStarted: false,
+                    gamePaused: false,
+                    gameReady: false,
+                });
+                return;
+            }
+
             console.error(err)
             return -1;
         });

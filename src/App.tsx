@@ -9,10 +9,10 @@ import CssBaseline from "@mui/material/CssBaseline";
 import {Routes, Route} from 'react-router-dom';
 import Box from '@mui/material/Box';
 
-import DesktopHeader from './Elements/Headers/DesktopHeader';
-import MobileHeader from './Elements/Headers/MobileHeader';
-import MobileFooter from './Elements/Footers/MobileFooter';
-import DesktopFooter from './Elements/Footers/DesktopFooter';
+import DesktopHeader from './components/Headers/DesktopHeader';
+import MobileHeader from './components/Headers/MobileHeader';
+import MobileFooter from './components/Footers/MobileFooter';
+import DesktopFooter from './components/Footers/DesktopFooter';
 
 const ThemePaletteModeContext = React.createContext({
   toggleThemePaletteMode: () => { }
