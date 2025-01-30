@@ -18,7 +18,7 @@ function Arena() {
   const theme = useTheme();
   const [engines, _] = useState(new Engines());
   const [referee, setReferee] = useState(new Referee());
-  
+
 
   const [engine1, setEngine1] = useState<string>('Loading');
   const [engine2, setEngine2] = useState<string>('Loading');
@@ -107,9 +107,25 @@ function Arena() {
         <Grid container spacing={10} sx={{ padding: 2, }}>
           <Grid size={{ xs: 12, lg: 6 }} alignContent='center' alignItems='center'>
             <Box width="100%" justifyContent='center' alignContent='center' display='flex'>
-              <Box width="90%" sx={{ backgroundColor: theme.palette.primary.dark, padding: 1, borderRadius: 4 }}>
-                {!referee.status.gameStarted && <Chessboard position={boardPosition} arePiecesDraggable={false} />}
-                {referee.status.gameStarted && <Chessboard position={boardPosition} isDraggablePiece={referee.onDragStart} onPieceDrop={referee.onDrop} />}
+              <Box width="90%">
+                {!gameStarted && <Chessboard
+                  position={boardPosition}
+                  arePiecesDraggable={false}
+                  customBoardStyle={{
+                    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
+                    borderRadius: "10px",
+                  }}
+                />}
+
+                {gameStarted && <Chessboard
+                  position={boardPosition} 
+                  isDraggablePiece={referee.onDragStart} 
+                  onPieceDrop={referee.onDrop}
+                  customBoardStyle={{
+                    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
+                    borderRadius: "10px",
+                  }}
+                />}
               </Box>
             </Box>
           </Grid>
@@ -134,7 +150,7 @@ function Arena() {
 
               <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', padding: 4, borderRadius: 5 }}>
                 <Typography variant="h5">
-                  Game Status: 
+                  Game Status:
                   {gamePaused && "Game Paused"}
                   {gameEnded && "Not playing"}
                   {gameReady && "Getting Ready..."}

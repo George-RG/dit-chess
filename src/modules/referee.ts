@@ -286,6 +286,9 @@ export class Referee {
             if (this.state.game.isCheckmate()) {
                 console.log("Checkmate!")
             } else if (this.state.game.isDraw()) {
+                console.log(this.state.game.isDrawByFiftyMoves())
+                console.log(this.state.game.isInsufficientMaterial())
+
                 console.log("Draw!")
             }
             this.updateStatus({ 
