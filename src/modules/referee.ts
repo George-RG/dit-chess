@@ -186,8 +186,6 @@ export class Referee {
         if (onMove){
             this.onMove = onMove;
         }
-
-        console.log("Delay: ", this.state.moveInterval, delay)
                 
         const promises = []
         if (this.state.whiteEngineSource.endsWith('.wasm')) {
