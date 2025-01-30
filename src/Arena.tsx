@@ -152,7 +152,7 @@ function Arena() {
                 <Typography variant="h5">
                   Game Status:
                   {gamePaused && "Game Paused"}
-                  {gameEnded && "Not playing"}
+                  {(gameEnded && !gameLoading) &&  "Not playing"}
                   {gameReady && "Getting Ready..."}
                   {gameLoading && "Loading..."}
                   {gameStarted && "Game Running"}

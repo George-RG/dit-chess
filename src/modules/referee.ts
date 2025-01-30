@@ -39,6 +39,11 @@ const randomEngine = async function (_: string, possibleMoves: string[]): Promis
 }
 
 const build_engine = (wasm: WebAssembly.WebAssemblyInstantiatedSource, timeout: number) => {
+    // Check that the wasm module has the necessary exports
+    if (!wasm.instance.exports["choose_move"]) {
+        throw new Error("WASM module does not have the necessary exports")
+    }
+
     return async (boardState: string, possibleMoves: string[]): Promise<number> => {
         return new Promise<number>((resolve, reject) => {
             const memory = new Uint8Array((wasm.instance.exports["memory"] as WebAssembly.Memory).buffer)
@@ -57,7 +62,11 @@ const build_engine = (wasm: WebAssembly.WebAssemblyInstantiatedSource, timeout: 
             }, timeout * 1000 + 100)
 
             try {
-                const moveIndex = (wasm.instance.exports["choose_move"] as (arg1: number, arg2: number, arg3: number) => number)(0, boardState.length + 1, timeout)
+                const func = wasm.instance.exports["choose_move"] as (arg1: number, arg2: number, arg3: number) => number
+                const moveIndex = func(0, boardState.length + 1, timeout)
+                if(moveIndex < 0 || moveIndex >= possibleMoves.length) {
+                    reject(new Error("Invalid move index"))
+                }
 
                 resolve(moveIndex)
             } catch (e) {
@@ -319,13 +328,7 @@ export class Referee {
                 else{
                     console.log("Black engine timed out")
                 }
-
-                this.updateStatus({
-                    gameEnded: true,
-                    gameStarted: false,
-                    gamePaused: false,
-                    gameReady: false,
-                });
+                
                 return -1;
             }
 
@@ -334,6 +337,12 @@ export class Referee {
         });
 
         if (moveIndex === -1) {
+            this.updateStatus({ 
+                gameEnded: true,
+                gameStarted: false,
+                gamePaused: false,
+                gameReady: false,
+            });
             return;
         }
 
