@@ -87,7 +87,7 @@ export class Referee {
             whiteEngineMove: randomEngine,
             blackEngineMove: randomEngine,
             timeout: 5,
-            moveInterval: delay || 1,
+            moveInterval: delay === undefined ? 1 : delay,
         };
 
         this.status = {
@@ -186,6 +186,8 @@ export class Referee {
         if (onMove){
             this.onMove = onMove;
         }
+
+        console.log("Delay: ", this.state.moveInterval, delay)
                 
         const promises = []
         if (this.state.whiteEngineSource.endsWith('.wasm')) {

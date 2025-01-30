@@ -35,7 +35,7 @@ function Arena() {
 
   const [boardPosition, setBoardPosition] = useState("start");
   const [score, setScore] = useState({ p1: 0, p2: 0, games: 1 });
-  const [delay, setDelay] = useState(0);
+  const [delay, setDelay] = useState(0.2);
 
   const updateScore = (target: string, val: number) => {
     if (target == 'p1')
@@ -206,7 +206,7 @@ function Arena() {
                           setDelay(Number(event.target.value));
                         }}
                       >
-                        <MenuItem value={0}>Max</MenuItem>
+                        <MenuItem value={0.2}>Max</MenuItem>
                         <MenuItem value={1}>1 extra second delay</MenuItem>
                         <MenuItem value={3}>3 extra seconds delay</MenuItem>
                         <MenuItem value={5}>5 extra seconds delay</MenuItem>
