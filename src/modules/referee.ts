@@ -84,10 +84,11 @@ export class Referee {
 
     onMove: (move: string, newBoardFen: string) => void;
     onStatusChange: (status: gameStatus) => void;
+    onGameEnd: (winner: string) => void;
 
     status: gameStatus;
 
-    constructor(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void, delay?: number, onStatusChange?: (status: gameStatus) => void) {
+    constructor(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void, delay?: number, onStatusChange?: (status: gameStatus) => void, onGameEnd?: (winner: string) => void) {
         this.state = {
             whiteEngineSource: whiteEngine || '',
             blackEngineSource: blackEngine || '',
@@ -109,6 +110,7 @@ export class Referee {
 
         this.onMove = onMove || function () { };
         this.onStatusChange = onStatusChange || function () { };
+        this.onGameEnd = onGameEnd || function () { };
     }
 
     updateStatus(newStatus: gameStatus) {
@@ -168,10 +170,9 @@ export class Referee {
         this.state.moveInterval = delay;
     }
 
-    async initGame(whiteEngine?: string, blackEngine?: string, delay?: number, onMove?:(move: string, newBoardFen: string) => void) {
+    async initGame(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void, delay?: number, onStatusChange?: (status: gameStatus) => void, onGameEnd?: (winner: string) => void) {
         if (this.status.gameStarted || this.status.gameLoading) return;
-        this.updateStatus({ gameLoading: true });
-
+        
         if (!whiteEngine && this.state.whiteEngineSource === '') {
             throw new Error('No white engine provided');
         }
@@ -195,7 +196,19 @@ export class Referee {
         if (onMove){
             this.onMove = onMove;
         }
+
+        if (onStatusChange){
+            this.onStatusChange = onStatusChange;
+        }
+
+        if (onGameEnd){
+            this.onGameEnd = onGameEnd;
+        }
                 
+        // Reset the game
+        this.updateStatus({ gameLoading: true });
+        this.state.game.reset();
+
         const promises = []
         if (this.state.whiteEngineSource.endsWith('.wasm')) {
             try
@@ -244,6 +257,20 @@ export class Referee {
         this.updateStatus({ gameReady: true });
     }
 
+    concludeGame(winner: string) {
+        if(this.status.gameEnded) return;
+
+        this.updateStatus({
+            gameStarted: false,
+            gamePaused: false,
+            gameEnded: true,
+            gameLoading: false,
+            gameReady: false
+        })
+        
+        this.onGameEnd(winner);
+    }
+
     startGame() {
         if (!this.status.gameReady) return;
 
@@ -273,16 +300,7 @@ export class Referee {
     stopGame(){
         if (!this.status.gameStarted) return
 
-        this.updateStatus({
-            gameStarted: false,
-            gamePaused: false,
-            gameEnded: true,
-            gameLoading: false,
-            gameReady: false
-        })
-
-        this.state.game.reset();
-        this.onMove('', this.state.game.fen());
+        this.concludeGame('stop');
     }
 
 
@@ -293,19 +311,13 @@ export class Referee {
 
         if (this.state.game.isGameOver()) {
             if (this.state.game.isCheckmate()) {
-                console.log("Checkmate!")
-            } else if (this.state.game.isDraw()) {
-                console.log(this.state.game.isDrawByFiftyMoves())
-                console.log(this.state.game.isInsufficientMaterial())
+                const winner = this.state.whiteToPlay ? 'black' : 'white';
+                console.log(`${winner} wins!`)
+                this.concludeGame(winner);
 
-                console.log("Draw!")
+            } else if (this.state.game.isDraw()) {
+                this.concludeGame('draw');
             }
-            this.updateStatus({ 
-                gameEnded: true,
-                gameStarted: false,
-                gamePaused: false,
-                gameReady: false,
-            });
             return;
         }
 
@@ -323,13 +335,13 @@ export class Referee {
         const moveIndex = await moveFunc(boardState, possibleMoves).catch((err) => {
             if(err.message === "Timeout") {
                 if(this.state.whiteToPlay){
-                    console.log("White engine timed out")
+                    this.concludeGame("black")
                 }
                 else{
-                    console.log("Black engine timed out")
+                    this.concludeGame("white")
                 }
                 
-                return -1;
+                return -2;
             }
 
             console.error(err)
@@ -337,12 +349,11 @@ export class Referee {
         });
 
         if (moveIndex === -1) {
-            this.updateStatus({ 
-                gameEnded: true,
-                gameStarted: false,
-                gamePaused: false,
-                gameReady: false,
-            });
+            this.concludeGame("error");
+            return;
+        }
+
+        if (moveIndex === -2) {
             return;
         }
 

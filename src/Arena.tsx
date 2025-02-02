@@ -17,51 +17,48 @@ import { Referee, gameStatus } from './modules/referee';
 function Arena() {
   const theme = useTheme();
   const [engines, _] = useState(new Engines());
-  const [referee, setReferee] = useState(new Referee());
-
 
   const [engine1, setEngine1] = useState<string>('Loading');
   const [engine2, setEngine2] = useState<string>('Loading');
   const [engineNames, setEngineNames] = useState<string[]>([]);
 
   const [enginesLoaded, setEnginesLoaded] = useState(false);
-  const [gameLoading, setGameLoading] = useState(referee.status.gameLoading);
-  const [gameReady, setGameReady] = useState(referee.status.gameReady);
-  const [gameStarted, setGameStarted] = useState(referee.status.gameStarted);
-  const [gamePaused, setGamePaused] = useState(referee.status.gamePaused);
-  const [gameEnded, setGameEnded] = useState(referee.status.gameEnded);
-
   const [selectErrors, setSelectErrors] = useState({ engine1: false, engine2: false });
 
   const [boardPosition, setBoardPosition] = useState("start");
-  const [score, setScore] = useState({ p1: 0, p2: 0, games: 1 });
   const [delay, setDelay] = useState(0.2);
 
-  const updateScore = (target: string, val: number) => {
-    if (target == 'p1')
-      setScore({ p1: score.p1 + 1, p2: score.p2, games: score.games })
-    else if (target == 'p2')
-      setScore({ p1: score.p1, p2: score.p2 + 1, games: score.games })
-    else if (target == 'tie')
-      setScore({ p1: score.p1 + val, p2: score.p2 + val, games: score.games })
-    else if (target == 'games')
-      setScore({ p1: 0, p2: 0, games: val })
-    else if (target == 'restart')
-      setScore({ p1: 0, p2: 0, games: score.games })
-    else if (target == 'reset')
-      setScore({ p1: 0, p2: 0, games: 1 })
+  const [whiteScore, setWhiteScore] = useState(0);
+  const [blackScore, setBlackScore] = useState(0);
+  const [totalGames, setTotalGames] = useState(1);
+  const [gamesLeft, setGamesLeft] = useState(0);
+
+  const whiteWin = () => {
+    setWhiteScore((whiteScore) => whiteScore + 1);
+  }
+
+  const blackWin = () => {
+    setBlackScore((blackScore) => blackScore + 1);
+  }
+
+  const tie = () => {
+    setWhiteScore((whiteScore) => whiteScore + 0.5);
+    setBlackScore((blackScore) => blackScore + 0.5);
+  }
+
+  const resetScore = () => {
+    setWhiteScore(0);
+    setBlackScore(0);
   }
 
   const changeEngine1 = (engine: string) => {
     setEngine1(engine);
     setSelectErrors({ engine1: false, engine2: selectErrors.engine2 });
-    updateScore('reset', 0);
   }
 
   const changeEngine2 = (engine: string) => {
     setEngine2(engine);
     setSelectErrors({ engine1: selectErrors.engine1, engine2: false });
-    updateScore('reset', 0);
   }
 
   const validateStart = () => {
@@ -70,17 +67,49 @@ function Arena() {
       return false;
     }
 
-    const newRef = new Referee(engine1, engine2, onMove, delay, onStatusChange);
-    setReferee(newRef);
-    newRef.initGame().then(() => {
-      newRef.startGame();
-    })
+    setGamesLeft(totalGames);
+    resetScore();
+
+    referee.initGame(engine1, engine2, undefined, delay, undefined, (winner: string) => onGameEnd(winner, totalGames))
+      .then(() => {
+        referee.startGame();
+      });
 
     return true;
   }
 
   const onMove = (_: string, fen: string) => {
     setBoardPosition(fen);
+  }
+
+  const onGameEnd = (winner: string, gamesLeft: number) => {
+    // If winner is black or white, update the score
+    // If winner is draw, update the score with 0.5
+    // If winner is error terminate the game
+    // If winner is stop, terminate the game
+    console.log(winner);
+    console.log(gamesLeft);
+
+    if (winner === "black") {
+      blackWin();
+    } else if (winner === "white") {
+      whiteWin();
+    } else if (winner === "draw") {
+      tie();
+    } else if (winner === "error" || winner === "stop") {
+      setGamesLeft(0);
+      return;
+    }
+
+    setGamesLeft(gamesLeft - 1);
+    if (gamesLeft-1 > 0) {
+      setTimeout(() => {
+        referee.initGame(undefined, undefined, undefined, undefined, undefined, (winner: string) => onGameEnd(winner, gamesLeft - 1))
+        .then(() => {
+          referee.startGame();
+        })
+      }, 1000);
+    }
   }
 
   useEffect(() => {
@@ -100,6 +129,13 @@ function Arena() {
     setGamePaused(status.gamePaused);
     setGameEnded(status.gameEnded);
   }
+
+  const [referee, __] = useState(new Referee(undefined, undefined, onMove, delay, onStatusChange, (winner: string) => onGameEnd(winner, gamesLeft)));
+  const [gameLoading, setGameLoading] = useState(referee.status.gameLoading);
+  const [gameReady, setGameReady] = useState(referee.status.gameReady);
+  const [gameStarted, setGameStarted] = useState(referee.status.gameStarted);
+  const [gamePaused, setGamePaused] = useState(referee.status.gamePaused);
+  const [gameEnded, setGameEnded] = useState(referee.status.gameEnded);
 
   return (
     <Container maxWidth={false} sx={{ bgcolor: theme.palette.background.paper }}>
@@ -135,15 +171,15 @@ function Arena() {
                 <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center' }}>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
                     <Typography variant="h5">{engine1 === "" ? "Player 1" : engine1.split(".wasm")[0]}</Typography>
-                    <Typography variant="h2">{score.p1}</Typography>
+                    <Typography variant="h2">{whiteScore}</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Typography variant="h6">Best of {score.games} {score.games == 1 ? 'Game' : 'Games'}</Typography>
+                    <Typography variant="h6">Best of {totalGames} {totalGames == 1 ? 'Game' : 'Games'}</Typography>
                     <Typography variant="h4">VS</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
                     <Typography variant="h5">{engine2 === "" ? "Player 2" : engine2.split(".wasm")[0]}</Typography>
-                    <Typography variant="h2">{score.p2}</Typography>
+                    <Typography variant="h2">{blackScore}</Typography>
                   </Box>
                 </Stack>
               </Box>
@@ -151,11 +187,11 @@ function Arena() {
               <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', padding: 4, borderRadius: 5 }}>
                 <Typography variant="h5">
                   Game Status:
-                  {gamePaused && "Game Paused"}
-                  {(gameEnded && !gameLoading) &&  "Not playing"}
-                  {gameReady && "Getting Ready..."}
-                  {gameLoading && "Loading..."}
-                  {gameStarted && "Game Running"}
+                  {gamePaused && " Game Paused"}
+                  {(gameEnded && !gameLoading && (gamesLeft === 0)) &&  " Not playing"}
+                  {gameReady && " Getting Ready..."}
+                  {gameLoading && " Loading..."}
+                  {((gameStarted || (!gameLoading && gamesLeft > 0)) && !gamePaused) && " Game Running"}
                 </Typography>
               </Box>
 
@@ -237,9 +273,9 @@ function Arena() {
                         labelId="GameNumber"
                         id="GameNumber"
                         label="Number of Games"
-                        value={score.games}
+                        value={totalGames}
                         onChange={(event: SelectChangeEvent<number>) => {
-                          updateScore('games', event.target.value as number);
+                          setTotalGames(Number(event.target.value));
                         }}
                       >
                         <MenuItem value={1}>1</MenuItem>
@@ -257,7 +293,7 @@ function Arena() {
                     <Stack direction="column" spacing={1}>
                       <FormControlLabel disabled control={<Checkbox />} label="Log Results" />
                       {/* Play button */}
-                      {!gameStarted &&
+                      {!(gameStarted || (!gameLoading && gamesLeft > 0)) &&
                         <Button
                           variant="contained"
                           size='large'
@@ -268,7 +304,7 @@ function Arena() {
                           {!enginesLoaded || gameLoading ? "Loading..." : "Play"}
                         </Button>
                       }
-                      {gameStarted &&
+                      {(gameStarted || (!gameLoading && gamesLeft > 0)) &&
                         <Grid container spacing={2}>
                           {!gamePaused ?
                             <Grid size={{ xs: 12, lg: 6 }}>
