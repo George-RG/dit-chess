@@ -1,6 +1,5 @@
 import React, { useState, useMemo} from 'react';
 import './App.css'
-import Header from './Header'
 import Arena from './Arena';
 import { lightTheme, darkTheme } from './configs/themes';
 import { ThemeProvider } from "@mui/material/styles";
