@@ -8,8 +8,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import {Routes, Route} from 'react-router-dom';
 import Box from '@mui/material/Box';
 
-import DesktopHeader from './components/Headers/DesktopHeader';
-import MobileHeader from './components/Headers/MobileHeader';
+import Header from './components/Header/Header';
 import MobileFooter from './components/Footers/MobileFooter';
 import DesktopFooter from './components/Footers/DesktopFooter';
 
@@ -47,12 +46,7 @@ const App: React.FC = () => {
         <CssBaseline />
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
-          <Box sx={{ display: {xs : 'flex', md: 'none'} }}>
-            <MobileHeader />
-          </Box>
-          <Box sx={{ display: {xs : 'none', md: 'flex'} }}>
-            <DesktopHeader />
-          </Box>
+          <Header/>
           <Routes>
             <Route path="/" element={<Arena />} />
             <Route path="/arena" element={<Arena />} />
