@@ -18,7 +18,7 @@ function DesktopHeader() {
   const location = useLocation(); // Get the current path
 
   return (
-    <AppBar position="static" sx={{ width: '100%' }}>
+    <AppBar position="static" sx={{ width: '100%'}} >
       <Container maxWidth={false}>
         <Toolbar>
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>

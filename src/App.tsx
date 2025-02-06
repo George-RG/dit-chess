@@ -53,6 +53,8 @@ const App: React.FC = () => {
           </Routes>
 
           <Box sx={{ display: {xs : 'flex', md: 'none'}}}>
+            {/* Add some more room */}
+            <Box sx={{ height: '50px' }} />
             <MobileFooter />
           </Box>
           <Box sx={{ display: {xs : 'none', md: 'flex'}, widht:"100%"}}>
