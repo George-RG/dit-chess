@@ -33,7 +33,7 @@ export interface gameStatus {
 // Random engine for testing - we gotta beat this!
 const randomEngine = async function (_: string, possibleMoves: string[]): Promise<number> {
     return new Promise<number>((resolve, _) => {
-        var randomIdx = Math.floor(Math.random() * possibleMoves.length)
+        const randomIdx = Math.floor(Math.random() * possibleMoves.length)
         resolve(randomIdx)
     });
 }
@@ -244,7 +244,7 @@ export class Referee {
 
         // Fetch all engines and then start the game(s)
         const wasms = await Promise.all(promises)
-        var engine_index = 0
+        let engine_index = 0
         if (this.state.whiteEngineSource.endsWith('.wasm')) {
             this.state.whiteEngineMove = build_engine(wasms[engine_index], this.state.timeout)
             engine_index += 1
