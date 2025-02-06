@@ -25,7 +25,7 @@ jobs:
         - name: Build
           run: npm run build
           env:
-            BASE_URL: '/chess/'
+            BASE_URL: '/~uoabot/chess/'
 
         - name: Modify index.html
           run: |
@@ -47,3 +47,8 @@ jobs:
 
         - name: Deploy except engines
           run: rsync -avz -e "ssh -i ../private.key" --exclude engines dist/ ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:/home/users/uoabot/public_html/chess/
+
+        - name: Fix permissions
+          run: |
+            ssh -i ../private.key ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} "find /home/users/uoabot/public_html/chess -type f -print0 | xargs -0 chmod a+r"
+            ssh -i ../private.key ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} "find /home/users/uoabot/public_html/chess/* -type d -print0 | xargs -0 chmod a+x"
