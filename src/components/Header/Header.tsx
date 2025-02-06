@@ -5,7 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import ChessLogo from '../../assets/logo.png';
-import { Container } from '@mui/material';
+import { Container, useTheme } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import ThemeSelector from '../ThemeSelector/ThemeSelector';
 
@@ -17,11 +17,12 @@ const pages = [
 ];
 
 function DesktopHeader() {
+  const theme = useTheme()
   const location = useLocation(); // Get the current path
 
   return (
     <AppBar position="static" sx={{ width: '100%'}} >
-      <Container maxWidth={false}>
+      <Container maxWidth={false} sx={{bgcolor: theme.palette.primary.main}}>
         <Toolbar>
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
             <Stack direction="row" spacing={0} display="flex" alignItems="center">
@@ -42,7 +43,7 @@ function DesktopHeader() {
                   mr: 2,
                   fontFamily: 'Inter',
                   fontWeight: 700,
-                  color: 'inherit',
+                  color: theme.palette.primary.contrastText,
                   textDecoration: 'none',
                   "&:hover": { color: 'inherit' }
                 }}

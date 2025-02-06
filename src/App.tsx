@@ -20,7 +20,7 @@ const App: React.FC = () => {
 
   const isSystemDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
   const [themePaletteMode, setThemePaletteMode] = useState(
-    'light'
+    isSystemDarkMode ? 'dark' : 'light'
   );
   // create a darkTheme function to handle dark theme using createTheme
   const themePaletteModeContextProvider = useMemo(
