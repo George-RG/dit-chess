@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+// Get the base url from the environment variable
+const base = process.env.BASE_URL || '/'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -25,4 +28,5 @@ export default defineConfig({
   },
   envDir: './',
   envPrefix: 'VITE_',
+  base: base,
 })

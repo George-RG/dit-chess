@@ -1,0 +1,48 @@
+name: Deploy to UoaBot
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+    deploy:
+      runs-on: ubuntu-latest
+    
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+    
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: 20
+    
+        - name: Install dependencies
+          run: npm install
+    
+        - name: Build
+          run: npm run build
+          env:
+            BASE_URL: '/chess/'
+
+        - name: Modify index.html
+          run: |
+            echo "Modifying index.html"
+            sed -i 's|<title>Vite + React + TS</title>|<title>Dit Chess</title>|g' dist/index.html
+            sed -i 's|<link rel="icon" type="image/svg+xml" href="/vite.svg" />|<link rel="icon" type="image/svg+xml" href="/chess/logo.png" />|g' dist/index.html
+    
+        - name: Setup SSH
+          run: |
+            mkdir -p ~/.ssh/
+            echo "Setting up SSH"
+            echo "$SSH_PRIVATE_KEY" > ../private.key
+            sudo chmod 600 ../private.key
+            echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          shell: bash
+          env:
+            SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+            SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+
+        - name: Deploy except engines
+          run: rsync -avz -e "ssh -i ../private.key" --exclude engines dist/ ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:/home/users/uoabot/public_html/chess/
