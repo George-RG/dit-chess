@@ -3,7 +3,7 @@ import './App.css'
 import Arena from './Arena';
 import { lightTheme, darkTheme } from './configs/themes';
 import { ThemeProvider } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
+// import useMediaQuery from "@mui/material/useMediaQuery";
 import CssBaseline from "@mui/material/CssBaseline";
 import {Routes, Route} from 'react-router-dom';
 import Box from '@mui/material/Box';
