@@ -16,6 +16,8 @@ const ThemePaletteModeContext = React.createContext({
   toggleThemePaletteMode: () => { }
 });
 
+const baseUrl = import.meta.env.BASE_URL;
+
 const App: React.FC = () => {
 
   // const isSystemDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
@@ -48,7 +50,7 @@ const App: React.FC = () => {
 
           <Header/>
           <Routes>
-            <Route path="/" element={<Arena />} />
+            <Route path={baseUrl+"/"} element={<Arena />} />
             <Route path="/arena" element={<Arena />} />
           </Routes>
 

@@ -3,7 +3,7 @@ name: Deploy to UoaBot
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
           run: |
             echo "Modifying index.html"
             sed -i 's|<title>Vite + React + TS</title>|<title>Dit Chess</title>|g' dist/index.html
-            sed -i 's|<link rel="icon" type="image/svg+xml" href="/vite.svg" />|<link rel="icon" type="image/svg+xml" href="/chess/logo.png" />|g' dist/index.html
+            sed -i 's|<link rel="icon" type="image/svg+xml" href="/vite.svg" />|<link rel="icon" type="image/svg+xml" href="/~uoabot/chess/logo.png" />|g' dist/index.html
     
         - name: Setup SSH
           run: |
@@ -44,6 +44,9 @@ jobs:
           env:
             SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
             SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+
+        - name: Remove old assets
+          run: ssh -i ../private.key ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} "rm -rf /home/users/uoabot/public_html/chess/assets"
 
         - name: Deploy except engines
           run: rsync -avz -e "ssh -i ../private.key" --exclude engines dist/ ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:/home/users/uoabot/public_html/chess/
