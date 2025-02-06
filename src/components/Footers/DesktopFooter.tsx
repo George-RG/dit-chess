@@ -1,24 +1,41 @@
-import * as React from 'react';
-import { useLocation, Link } from 'react-router-dom'; // Import necessary routing hooks
-import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
-import { useState } from 'react';
-
-import RestoreIcon from "@mui/icons-material/Restore";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-
+import { Typography, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 function DesktopFooter() {
+  const theme = useTheme();
   return (
-    <Box sx={{width: "100%",
-        display: "flex",
-        flexDirection:"column",
+    <Box
+      display={{ xs: 'none', md: 'flex' }}
+      bgcolor={theme.palette.primary.main}
+      sx={{
+        width: "100%",
+        flexDirection: "column",
         justifyContent: "center",
-        alignItems: "center"}}>
-        <p>Made with ❤ by
-        <a href="https://github.com/George-RG/"> GeorgeRG</a> & <a href="https://github.com/DPorichis/"> DPorichis</a>
-        </p>
-        <>For the IP class of 2024</>
+        alignItems: "center"
+      }}>
+      <Typography variant="body1" color={theme.palette.primary.contrastText} sx={{ mt: 2 }}>
+        Made with ❤ by  &nbsp;
+        <Link
+          to="https://github.com/George-RG/"
+          style={{ color: theme.palette.secondary.main }}
+        >
+          GeorgeRG
+        </Link>
+        &nbsp;
+        &
+        &nbsp;
+        <Link 
+          to="https://github.com/DPorichis/"
+          style={{ color: theme.palette.secondary.main }}
+        >
+          DPorichis
+        </Link>
+      </Typography>
+      <Typography variant="body1" color={theme.palette.primary.contrastText} sx={{ mt: 2 }}>
+        For the IP class of 2024
+      </Typography>
+
     </Box>
   );
 };

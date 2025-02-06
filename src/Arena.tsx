@@ -195,7 +195,7 @@ function Arena() {
                 </Typography>
               </Box>
 
-              <Box sx={{ bgcolor: theme.palette.background.paper, border: 'solid 2px', borderColor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: 10, paddingY: 5, borderRadius: 5, marginLeft: "10%" }}>
+              <Box sx={{ bgcolor: theme.palette.background.paper, border: 'solid 2px', borderColor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: {xs: 5, md: 10}, paddingY: 5, borderRadius: 5, marginLeft: "10%" }}>
                 <Grid container columnSpacing={1} rowSpacing={5}>
                   <Grid size={{ xs: 6 }}>
                     <FormControl sx={{ width: "90%" }} error={selectErrors.engine1}>
