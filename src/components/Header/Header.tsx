@@ -7,6 +7,8 @@ import Button from '@mui/material/Button';
 import ChessLogo from '../../assets/logo.png';
 import { Container } from '@mui/material';
 import Stack from '@mui/material/Stack';
+import ThemeSelector from '../ThemeSelector/ThemeSelector';
+
 
 const pages = [
   { name: '1v1 Arena', path: '/', disabled: false },
@@ -98,6 +100,10 @@ function DesktopHeader() {
                 {page.name}
               </Button>
             ))}
+          </Box>
+
+          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+            <ThemeSelector/>
           </Box>
         </Toolbar>
       </Container>
