@@ -1,3 +1,5 @@
+const baseUrl = import.meta.env.BASE_URL;
+
 class Engines{
 
     engineFiles: string[] = [];
@@ -19,7 +21,7 @@ class Engines{
 
     async fetchEngines(){
         try{
-            const response = await fetch('/engines/engines.json');
+            const response = await fetch(baseUrl + '/engines/engines.json');
             const data = await response.json();
 
             this.engineFiles = data.engines;
