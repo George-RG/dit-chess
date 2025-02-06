@@ -102,12 +102,12 @@ function Arena() {
     }
 
     setGamesLeft(gamesLeft - 1);
-    if (gamesLeft-1 > 0) {
+    if (gamesLeft - 1 > 0) {
       setTimeout(() => {
         referee.initGame(undefined, undefined, undefined, undefined, undefined, (winner: string) => onGameEnd(winner, gamesLeft - 1))
-        .then(() => {
-          referee.startGame();
-        })
+          .then(() => {
+            referee.startGame();
+          })
       }, 1000);
     }
   }
@@ -139,8 +139,8 @@ function Arena() {
 
   return (
     <Container maxWidth={false} sx={{ bgcolor: theme.palette.background.paper }}>
-      <Box sx={{ flexGrow: 1, padding: 5, height: "100%" }}>
-        <Grid container spacing={10} sx={{ padding: 2, }}>
+      <Box sx={{ flexGrow: 1, padding: { xs: 0, sm: 5 }, height: "100%" }}>
+        <Grid container spacing={{ xs: 3, sm: 10 }} sx={{ padding: 2, }}>
           <Grid size={{ xs: 12, lg: 6 }} alignContent='center' alignItems='center'>
             <Box width="100%" justifyContent='center' alignContent='center' display='flex'>
               <Box width="90%">
@@ -154,8 +154,8 @@ function Arena() {
                 />}
 
                 {gameStarted && <Chessboard
-                  position={boardPosition} 
-                  isDraggablePiece={referee.onDragStart} 
+                  position={boardPosition}
+                  isDraggablePiece={referee.onDragStart}
                   onPieceDrop={referee.onDrop}
                   customBoardStyle={{
                     boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
@@ -167,35 +167,43 @@ function Arena() {
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>
             <Stack spacing={2}>
-              <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: 10, paddingY: 5, borderRadius: 5 }}>
+              <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: { xs: 2, md: 10 }, paddingY: { xs: 2, md: 5 }, borderRadius: 5 }}>
                 <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center' }}>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Typography variant="h5">{engine1 === "" ? "Player 1" : engine1.split(".wasm")[0]}</Typography>
-                    <Typography variant="h2">{whiteScore}</Typography>
+                    <Typography sx={{ typography: { xs: 'h6', md: 'h5' } }} noWrap>
+                      {engine1 === "" ? "Player 1" : engine1.split(".wasm")[0]}
+                    </Typography>
+                    <Typography noWrap sx={{ typography: { xs: 'h2', md: 'h1' } }}>
+                      {whiteScore}
+                    </Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
                     <Typography variant="h6">Best of {totalGames} {totalGames == 1 ? 'Game' : 'Games'}</Typography>
                     <Typography variant="h4">VS</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-                    <Typography variant="h5">{engine2 === "" ? "Player 2" : engine2.split(".wasm")[0]}</Typography>
-                    <Typography variant="h2">{blackScore}</Typography>
+                    <Typography sx={{ typography: { xs: 'h6', md: 'h5' } }} noWrap>
+                      {engine2 === "" ? "Player 2" : engine2.split(".wasm")[0]}
+                    </Typography>
+                    <Typography noWrap sx={{ typography: { xs: 'h2', md: 'h1' } }}>
+                      {blackScore}
+                    </Typography>
                   </Box>
                 </Stack>
               </Box>
 
-              <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', padding: 4, borderRadius: 5 }}>
-                <Typography variant="h5">
+              <Box sx={{ bgcolor: theme.palette.primary.main, color: 'primary.contrastText', padding: {xs:2, sm: 4}, borderRadius: 5 }}>
+                <Typography noWrap sx={{ typography: { xs: 'h6', md: 'h5' } }}>
                   Game Status:
                   {gamePaused && " Game Paused"}
-                  {(gameEnded && !gameLoading && (gamesLeft === 0)) &&  " Not playing"}
+                  {(gameEnded && !gameLoading && (gamesLeft === 0)) && " Not playing"}
                   {gameReady && " Getting Ready..."}
                   {gameLoading && " Loading..."}
                   {((gameStarted || (!gameLoading && gamesLeft > 0)) && !gamePaused) && " Game Running"}
                 </Typography>
               </Box>
 
-              <Box sx={{ bgcolor: theme.palette.background.paper, border: 'solid 2px', borderColor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: {xs: 5, md: 10}, paddingY: 5, borderRadius: 5, marginLeft: "10%" }}>
+              <Box sx={{ bgcolor: theme.palette.background.paper, border: 'solid 2px', borderColor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: { xs: 5, md: 10 }, paddingY: 5, borderRadius: 5, marginLeft: "10%" }}>
                 <Grid container columnSpacing={1} rowSpacing={5}>
                   <Grid size={{ xs: 6 }}>
                     <FormControl sx={{ width: "90%" }} error={selectErrors.engine1}>
