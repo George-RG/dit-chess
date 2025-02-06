@@ -18,9 +18,9 @@ const ThemePaletteModeContext = React.createContext({
 
 const App: React.FC = () => {
 
-  const isSystemDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
+  // const isSystemDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
   const [themePaletteMode, setThemePaletteMode] = useState(
-    isSystemDarkMode ? 'dark' : 'light'
+    'light'
   );
   // create a darkTheme function to handle dark theme using createTheme
   const themePaletteModeContextProvider = useMemo(
