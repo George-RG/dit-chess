@@ -1,6 +1,8 @@
 import { Chess } from "chess.js";
 import { Piece, Square } from "react-chessboard/dist/chessboard/types";
 
+const baseUrl = import.meta.env.BASE_URL;
+
 const importObject = {
     env: {
         __memory_base: 0,
@@ -213,7 +215,7 @@ export class Referee {
         if (this.state.whiteEngineSource.endsWith('.wasm')) {
             try
             {
-                const wasmPromise = WebAssembly.instantiateStreaming(fetch(`/engines/${this.state.whiteEngineSource}`), importObject)
+                const wasmPromise = WebAssembly.instantiateStreaming(fetch(baseUrl + `/engines/${this.state.whiteEngineSource}`), importObject)
                 promises.push(wasmPromise)   
             } catch (e) {
                 console.error(e)
@@ -229,7 +231,7 @@ export class Referee {
         if (this.state.blackEngineSource.endsWith('.wasm')) {
             try
             {
-                const wasmPromise = WebAssembly.instantiateStreaming(fetch(`/engines/${this.state.blackEngineSource}`), importObject)
+                const wasmPromise = WebAssembly.instantiateStreaming(fetch(baseUrl + `/engines/${this.state.blackEngineSource}`), importObject)
                 promises.push(wasmPromise)   
             } catch (e) {
                 console.error(e)
