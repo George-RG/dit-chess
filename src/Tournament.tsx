@@ -90,7 +90,7 @@ function Tournament() {
       <Typography variant="h4" align="center">Tournament vs Random</Typography>
       <Grid2 container spacing={3}>
         {matches.map(match => (
-          <Grid2 key={match.wasmEngine} xs={12} sm={6} md={4} lg={3}>
+          <Grid2 key={match.wasmEngine} component="div">
             <Box sx={{ textAlign: "center", border: "1px solid gray", padding: 2, borderRadius: 3 }}>
               <Typography width={160} variant="h6" noWrap sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{match.wasmEngine.split(".wasm")[0]}</Typography>
               <Chessboard position={boardPositions[match.wasmEngine]} arePiecesDraggable={false} boardWidth={160} />
