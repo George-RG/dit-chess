@@ -25,8 +25,7 @@ function Tournament() {
     engines.fetchEngines().then(() => {
       const allEngines = engines.getEngineNames();
 
-      // and keep only the first two wasm engines
-      const wasmOnlyEngines = allEngines.filter(name => !["human", "random"].includes(name));
+      const wasmOnlyEngines = allEngines.filter(name => !["human", "random"].includes(name)).slice(0, 4);
       setWasmEngines(wasmOnlyEngines);
 
       // Initialize matches
@@ -50,13 +49,14 @@ function Tournament() {
           match.wasmEngine,
           match.randomEngine,
           (_: string, fen: string) => updateBoard(matchKey, fen),
-          1,
+          0.1,
           undefined,
           (winner: string) => onGameEnd(matchKey, winner)
         );
 
         newReferees[matchKey].initGame(match.wasmEngine, match.randomEngine)
-          .then(() => newReferees[matchKey].startGame());
+          .then(() => newReferees[matchKey].startGame())
+          .catch(error => console.error(`Error initializing game for ${matchKey}:`, error));
       });
 
       setReferees(newReferees);

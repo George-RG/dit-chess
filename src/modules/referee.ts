@@ -213,13 +213,8 @@ export class Referee {
 
         const promises = []
         if (this.state.whiteEngineSource.endsWith('.wasm')) {
-            try
-            {
-                const wasmPromise = WebAssembly.instantiateStreaming(fetch(baseUrl + `/engines/${this.state.whiteEngineSource}`), importObject)
-                promises.push(wasmPromise)
-            } catch (e) {
-                console.error(e)
-            }
+            const wasmPromise = WebAssembly.instantiateStreaming(fetch(baseUrl + `/engines/${this.state.whiteEngineSource}`), importObject)
+            promises.push(wasmPromise)
         } else if (this.state.whiteEngineSource === 'random') {
             this.state.whiteEngineMove = randomEngine
         } else if (this.state.whiteEngineSource === 'human') {
