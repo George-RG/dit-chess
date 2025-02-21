@@ -69,19 +69,22 @@ function Tournament() {
   };
 
   const onGameEnd = (matchKey: string, winner: string) => {
-    setMatches(prevMatches =>
-      prevMatches.map(match => {
+    setMatches(prevMatches => {
+      const updatedMatches = prevMatches.map(match => {
         if (match.wasmEngine === matchKey) {
           if (winner === "white") return { ...match, wins: match.wins + 1 };
           if (winner === "black") return { ...match, losses: match.losses + 1 };
         }
         return match;
-      })
-    );
+      });
+      return [...updatedMatches].sort((a, b) => b.wins - a.wins);
+    });
 
     // Restart the game for continuous play
     setTimeout(() => {
-      referees[matchKey].initGame().then(() => referees[matchKey].startGame());
+      referees[matchKey].initGame()
+        .then(() => referees[matchKey].startGame())
+        .catch(error => console.error(`Error restarting game for ${matchKey}:`, error));
     }, 30000);
   };
 

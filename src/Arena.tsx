@@ -73,7 +73,8 @@ function Arena() {
     referee.initGame(engine1, engine2, undefined, delay, undefined, (winner: string) => onGameEnd(winner, totalGames))
       .then(() => {
         referee.startGame();
-      });
+      })
+      .catch(error => console.error("Error starting game:", error));
 
     return true;
   }
