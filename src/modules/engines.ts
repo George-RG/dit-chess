@@ -1,4 +1,4 @@
-const baseUrl = import.meta.env.BASE_URL;
+const baseUrl = import.meta.env.BASE_URL === '/' ? './' : import.meta.env.BASE_URL;
 
 class Engines{
 
@@ -10,7 +10,7 @@ class Engines{
 
     constructor(){
     }
-    
+
     getEngineFiles(){
         return this.engineFiles;
     }
@@ -21,6 +21,7 @@ class Engines{
 
     async fetchEngines(){
         try{
+            console.log(baseUrl);
             const response = await fetch(baseUrl + '/engines/engines.json');
             const data = await response.json();
 

@@ -1,7 +1,7 @@
 import { Chess } from "chess.js";
 import { Piece, Square } from "react-chessboard/dist/chessboard/types";
 
-const baseUrl = import.meta.env.BASE_URL;
+const baseUrl = import.meta.env.BASE_URL === '/' ? './' : import.meta.env.BASE_URL;
 
 const importObject = {
     env: {
@@ -174,7 +174,7 @@ export class Referee {
 
     async initGame(whiteEngine?: string, blackEngine?: string, onMove?: (move: string, newBoardFen: string) => void, delay?: number, onStatusChange?: (status: gameStatus) => void, onGameEnd?: (winner: string) => void) {
         if (this.status.gameStarted || this.status.gameLoading) return;
-        
+
         if (!whiteEngine && this.state.whiteEngineSource === '') {
             throw new Error('No white engine provided');
         }
@@ -186,7 +186,7 @@ export class Referee {
         if (whiteEngine) {
             this.state.whiteEngineSource = whiteEngine;
         }
-        
+
         if (blackEngine) {
             this.state.blackEngineSource = blackEngine;
         }
@@ -194,7 +194,7 @@ export class Referee {
         if (delay){
             this.state.moveInterval = delay;
         }
-        
+
         if (onMove){
             this.onMove = onMove;
         }
@@ -206,7 +206,7 @@ export class Referee {
         if (onGameEnd){
             this.onGameEnd = onGameEnd;
         }
-                
+
         // Reset the game
         this.updateStatus({ gameLoading: true });
         this.state.game.reset();
@@ -216,10 +216,10 @@ export class Referee {
             try
             {
                 const wasmPromise = WebAssembly.instantiateStreaming(fetch(baseUrl + `/engines/${this.state.whiteEngineSource}`), importObject)
-                promises.push(wasmPromise)   
+                promises.push(wasmPromise)
             } catch (e) {
                 console.error(e)
-            }                     
+            }
         } else if (this.state.whiteEngineSource === 'random') {
             this.state.whiteEngineMove = randomEngine
         } else if (this.state.whiteEngineSource === 'human') {
@@ -232,10 +232,10 @@ export class Referee {
             try
             {
                 const wasmPromise = WebAssembly.instantiateStreaming(fetch(baseUrl + `/engines/${this.state.blackEngineSource}`), importObject)
-                promises.push(wasmPromise)   
+                promises.push(wasmPromise)
             } catch (e) {
                 console.error(e)
-            }                     
+            }
         } else if (this.state.blackEngineSource === 'random') {
             this.state.blackEngineMove = randomEngine
         } else if (this.state.blackEngineSource === 'human') {
@@ -269,7 +269,7 @@ export class Referee {
             gameLoading: false,
             gameReady: false
         })
-        
+
         this.onGameEnd(winner);
     }
 
@@ -342,7 +342,7 @@ export class Referee {
                 else{
                     this.concludeGame("white")
                 }
-                
+
                 return -2;
             }
 
