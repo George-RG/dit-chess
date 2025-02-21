@@ -12,7 +12,7 @@ import ThemeSelector from '../ThemeSelector/ThemeSelector';
 
 const pages = [
   { name: '1v1 Arena', path: '/', disabled: false },
-  { name: 'Tournament', path: '/tournament', disabled: true },
+  { name: 'Tournament', path: '/tournament', disabled: false },
   { name: 'Live', path: '/live', disabled: true },
 ];
 

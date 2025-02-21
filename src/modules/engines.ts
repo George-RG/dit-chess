@@ -1,4 +1,4 @@
-const baseUrl = import.meta.env.BASE_URL === '/' ? './' : import.meta.env.BASE_URL;
+import { baseUrl } from '../configs/constants';
 
 class Engines{
 

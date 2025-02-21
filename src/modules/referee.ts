@@ -1,7 +1,7 @@
 import { Chess } from "chess.js";
 import { Piece, Square } from "react-chessboard/dist/chessboard/types";
 
-const baseUrl = import.meta.env.BASE_URL === '/' ? './' : import.meta.env.BASE_URL;
+import { baseUrl } from '../configs/constants';
 
 const importObject = {
     env: {

@@ -18,4 +18,4 @@ clean:
 
 .PHONY: fetch-engines
 fetch-engines:
-	curl -LO https://github.com/ethan42/arena/releases/latest/download/engines.tar.gz && tar -xvf engines.tar.gz -C ./
+	curl -LO https://github.com/ethan42/arena/releases/latest/download/engines.tar.gz && tar -xvf engines.tar.gz -C ./public

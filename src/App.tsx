@@ -1,6 +1,7 @@
 import React, { useState, useMemo} from 'react';
 import './App.css'
 import Arena from './Arena';
+import Tournament from './Tournament';
 import { lightTheme, darkTheme } from './configs/themes';
 import { ThemeProvider } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
@@ -52,6 +53,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path={baseUrl+"/"} element={<Arena />} />
             <Route path="/arena" element={<Arena />} />
+            <Route path="/tournament" element={<Tournament />} />
           </Routes>
 
           <Box sx={{ display: {xs : 'flex', md: 'none'}}}>
