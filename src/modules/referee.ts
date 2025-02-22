@@ -67,9 +67,9 @@ const build_engine = (wasm: WebAssembly.WebAssemblyInstantiatedSource, timeout: 
                 const func = wasm.instance.exports["choose_move"] as (arg1: number, arg2: number, arg3: number) => number
                 const moveIndex = func(0, boardState.length + 1, timeout)
                 if(moveIndex < 0 || moveIndex >= possibleMoves.length) {
-                    reject(new Error("Invalid move index"))
+                    console.log("Invalid move index ", moveIndex);
+                    reject(new Error("Invalid move index"));
                 }
-
                 resolve(moveIndex)
             } catch (e) {
                 reject(e)
@@ -268,7 +268,14 @@ export class Referee {
         this.onGameEnd(winner);
     }
 
+    isGameOver() {
+        return this.state.game.isGameOver();
+    }
+
     startGame() {
+        this.updateStatus({
+            gameEnded: false,
+        })
         if (!this.status.gameReady) return;
 
         this.updateStatus({

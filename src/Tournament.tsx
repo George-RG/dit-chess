@@ -19,13 +19,35 @@ function Tournament() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [boardPositions, setBoardPositions] = useState<{ [key: string]: string }>({});
   const [referees, setReferees] = useState<{ [key: string]: Referee }>({});
+  const delay = 0.1;
+
+  const startGame = (matchKey: string) => {
+    const engine = matchKey + ".wasm";
+    const referee = new Referee(
+      engine,
+      "random",
+      (_: string, fen: string) => updateBoard(matchKey, fen),
+      delay,
+      undefined,
+      (winner: string) => onGameEnd(matchKey, winner)
+    );
+    setReferees(prevReferees => {
+      return { ...prevReferees, [matchKey]: referee };
+    });
+    setBoardPositions(prevBoardPositions => {
+      return { ...prevBoardPositions, [matchKey]: "start" };
+    });
+    referee.initGame(engine, "random", (_: string, fen: string) => updateBoard(matchKey, fen), delay, undefined, (winner: string) => onGameEnd(matchKey, winner))
+      .then(() => referee.startGame())
+      .catch(error => console.error(`Error initializing game for ${matchKey}:`, error));
+  };
 
   useEffect(() => {
     // Load available engines
     engines.fetchEngines().then(() => {
       const allEngines = engines.getEngineNames();
 
-      const wasmOnlyEngines = allEngines.filter(name => !["human", "random"].includes(name)).slice(0, 4);
+      const wasmOnlyEngines = allEngines.filter(name => !["human", "random"].includes(name)).slice(0, 2);
       setWasmEngines(wasmOnlyEngines);
 
       // Initialize matches
@@ -49,12 +71,12 @@ function Tournament() {
           match.wasmEngine,
           match.randomEngine,
           (_: string, fen: string) => updateBoard(matchKey, fen),
-          0.1,
+          delay,
           undefined,
           (winner: string) => onGameEnd(matchKey, winner)
         );
 
-        newReferees[matchKey].initGame(match.wasmEngine, match.randomEngine)
+        newReferees[matchKey].initGame(match.wasmEngine, match.randomEngine, (_: string, fen: string) => updateBoard(matchKey, fen), delay, undefined, (winner: string) => onGameEnd(matchKey, winner))
           .then(() => newReferees[matchKey].startGame())
           .catch(error => console.error(`Error initializing game for ${matchKey}:`, error));
       });
@@ -69,30 +91,30 @@ function Tournament() {
   };
 
   const onGameEnd = (matchKey: string, winner: string) => {
+    console.log(`Game ended for ${matchKey}. Winner: ${winner}`);
     setMatches(prevMatches => {
       const updatedMatches = prevMatches.map(match => {
         if (match.wasmEngine === matchKey) {
+          console.log(`Updating match for ${matchKey}`);
           if (winner === "white") return { ...match, wins: match.wins + 1 };
           if (winner === "black") return { ...match, losses: match.losses + 1 };
+          return {...match, wins: match.wins + 0.5, losses: match.losses + 0.5};
         }
         return match;
       });
-      return [...updatedMatches].sort((a, b) => b.wins - a.wins);
+      console.log("Updated matches:", updatedMatches);
+      return updatedMatches;
     });
 
     // Restart the game for continuous play
-    setTimeout(() => {
-      referees[matchKey].initGame()
-        .then(() => referees[matchKey].startGame())
-        .catch(error => console.error(`Error restarting game for ${matchKey}:`, error));
-    }, 30000);
+    setTimeout(() => {startGame(matchKey);}, 1000);
   };
 
   return (
     <Box sx={{ padding: 3 }}>
       <Typography variant="h4" align="center">Tournament vs Random</Typography>
       <Grid2 container spacing={3}>
-        {matches.map(match => (
+        {[...matches].sort((a, b) => b.wins - a.wins).map(match => (
           <Grid2 key={match.wasmEngine} component="div">
             <Box sx={{ textAlign: "center", border: "1px solid gray", padding: 2, borderRadius: 3 }}>
               <Typography width={160} variant="h6" noWrap sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{match.wasmEngine.split(".wasm")[0]}</Typography>
