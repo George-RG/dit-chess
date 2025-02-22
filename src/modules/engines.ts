@@ -21,8 +21,7 @@ class Engines{
 
     async fetchEngines(){
         try{
-            console.log("Fetching engines from", baseUrl);
-            const response = await fetch(baseUrl + '/engines/engines.json');
+            const response = await fetch('.' + baseUrl + '/engines/engines.json');
             const data = await response.json();
 
             this.engineFiles = data.engines;

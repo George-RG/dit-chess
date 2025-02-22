@@ -8,12 +8,12 @@ import ChessLogo from '../../assets/logo.png';
 import { Container, useTheme } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import ThemeSelector from '../ThemeSelector/ThemeSelector';
-
+import { baseUrl } from '../../configs/constants';
 
 const pages = [
-  { name: '1v1 Arena', path: '/', disabled: false },
-  { name: 'Tournament', path: '/tournament', disabled: false },
-  { name: 'Live', path: '/live', disabled: true },
+  { name: '1v1 Arena', path: baseUrl + 'arena', disabled: false },
+  { name: 'Tournament', path: baseUrl + 'tournament', disabled: false },
+  { name: 'Live', path: baseUrl + 'live', disabled: true },
 ];
 
 function DesktopHeader() {
