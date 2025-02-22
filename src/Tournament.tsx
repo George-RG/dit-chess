@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Chessboard } from "react-chessboard";
 import Box from '@mui/material/Box';
 import Grid2 from '@mui/material/Grid2';
@@ -6,122 +6,109 @@ import Typography from '@mui/material/Typography';
 import Engines from './modules/engines';
 import { Referee } from './modules/referee';
 
-interface Match {
-  wasmEngine: string;
-  randomEngine: string;
-  wins: number;
-  losses: number;
+interface Team {
+  name: string;
+  won: number;
+  lost: number;
+}
+
+interface RandomGameProps {
+  key: string;
+  teamName: string;
+  onScoreChange: (teamName: string, won: number, lost: number) => void;
+}
+
+function RandomGame(props: RandomGameProps) {
+  const { teamName, onScoreChange } = props;
+  const engine = teamName + ".wasm";
+  const [boardPosition, setBoardPosition] = useState("start");
+  const [pointsWon, setPointsWon] = useState(0);
+  const [pointsLost, setPointsLost] = useState(0);
+  const delay = 0.3;
+
+  useEffect(() => {
+    onScoreChange(teamName, pointsWon, pointsLost);
+  }, [pointsWon, pointsLost, onScoreChange]);
+
+  const onGameEnd = (winner: string) => {
+    console.log(`Game ${teamName} ended. Winner: ${winner}`);
+    if (winner === "white") {
+      setPointsWon((pointsWon) => pointsWon + 1);
+    } else if (winner === "black") {
+      setPointsLost((pointsLost) => pointsLost + 1);
+    } else if (winner == "draw") {
+      setPointsLost((pointsLost) => pointsLost + 0.5);
+      setPointsWon((pointsWon) => pointsWon + 0.5);
+    } else {
+      console.error(`Unknown winner: ${winner}, no more games.`);
+      return;
+    }
+    referee.resetGame();
+    referee.initGame(engine, "random", (_: string, fen: string) => setBoardPosition(fen), delay, undefined, onGameEnd)
+      .then(() => referee.startGame())
+      .catch(error => console.error(`Error initializing game for ${teamName}:`, error));
+  }
+
+  const referee = new Referee(
+    engine,
+    "random",
+    (_: string, fen: string) => setBoardPosition(fen),
+    delay,
+    undefined,
+    onGameEnd,
+  );
+
+  useEffect(() => {
+    referee.initGame(engine, "random", (_: string, fen: string) => setBoardPosition(fen), delay, undefined, onGameEnd)
+      .then(() => referee.startGame())
+      .catch(error => console.error(`Error initializing game for ${teamName}:`, error));
+  }, []);
+
+  return (
+    <Grid2 key={teamName} component="div">
+      <Box sx={{ textAlign: "center", border: "1px solid gray", padding: 2, borderRadius: 3 }}>
+        <Typography width={160} variant="h6" noWrap sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{teamName}</Typography>
+        <Chessboard position={boardPosition} arePiecesDraggable={false} boardWidth={160} />
+        <Typography>Wins: {pointsWon} | Losses: {pointsLost}</Typography>
+      </Box>
+    </Grid2>
+  )
 }
 
 function Tournament() {
-  const [engines, _setEngines] = useState(new Engines());
-  const [_wasmEngines, setWasmEngines] = useState<string[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [boardPositions, setBoardPositions] = useState<{ [key: string]: string }>({});
-  const [referees, setReferees] = useState<{ [key: string]: Referee }>({});
-  const delay = 0.1;
+  const engines = new Engines();
+  const [teams, setTeams] = useState<Team[]>([]);
 
-  const startGame = (matchKey: string) => {
-    const engine = matchKey + ".wasm";
-    const referee = new Referee(
-      engine,
-      "random",
-      (_: string, fen: string) => updateBoard(matchKey, fen),
-      delay,
-      undefined,
-      (winner: string) => onGameEnd(matchKey, winner)
-    );
-    setReferees(prevReferees => {
-      return { ...prevReferees, [matchKey]: referee };
-    });
-    setBoardPositions(prevBoardPositions => {
-      return { ...prevBoardPositions, [matchKey]: "start" };
-    });
-    referee.initGame(engine, "random", (_: string, fen: string) => updateBoard(matchKey, fen), delay, undefined, (winner: string) => onGameEnd(matchKey, winner))
-      .then(() => referee.startGame())
-      .catch(error => console.error(`Error initializing game for ${matchKey}:`, error));
-  };
-
+  // Fetch only wasm engines (team names) and set them as teams
   useEffect(() => {
-    // Load available engines
     engines.fetchEngines().then(() => {
-      const allEngines = engines.getEngineNames();
-
-      const wasmOnlyEngines = allEngines.filter(name => !["human", "random"].includes(name)).slice(0, 2);
-      setWasmEngines(wasmOnlyEngines);
-
-      // Initialize matches
-      const initialMatches = wasmOnlyEngines.map(engine => ({
-        wasmEngine: engine + ".wasm",
-        randomEngine: "random",
-        wins: 0,
-        losses: 0
-      }));
-      setMatches(initialMatches);
-
-      // Create referees and board positions for each match
-      const newReferees: { [key: string]: Referee } = {};
-      const newBoardPositions: { [key: string]: string } = {};
-
-      initialMatches.forEach(match => {
-        const matchKey = match.wasmEngine;
-        newBoardPositions[matchKey] = "start";
-
-        newReferees[matchKey] = new Referee(
-          match.wasmEngine,
-          match.randomEngine,
-          (_: string, fen: string) => updateBoard(matchKey, fen),
-          delay,
-          undefined,
-          (winner: string) => onGameEnd(matchKey, winner)
-        );
-
-        newReferees[matchKey].initGame(match.wasmEngine, match.randomEngine, (_: string, fen: string) => updateBoard(matchKey, fen), delay, undefined, (winner: string) => onGameEnd(matchKey, winner))
-          .then(() => newReferees[matchKey].startGame())
-          .catch(error => console.error(`Error initializing game for ${matchKey}:`, error));
-      });
-
-      setReferees(newReferees);
-      setBoardPositions(newBoardPositions);
+      console.log(engines.getEngineNames());
+      const wasmEngines = engines.getEngineNames().filter(name => !["human", "random"].includes(name));
+      const newTeams = wasmEngines.map((engine) => {return {name: engine, won: 0, lost: 0}});
+      setTeams(newTeams);
     });
   }, []);
 
-  const updateBoard = (matchKey: string, fen: string) => {
-    setBoardPositions(prev => ({ ...prev, [matchKey]: fen }));
-  };
+  // Callback to update a team’s score.
+  const handleScoreChange = useCallback((teamName: string, won: number, lost: number) => {
+    setTeams(prevTeams =>
+      prevTeams.map(team =>
+        team.name === teamName ? { ...team, won, lost } : team
+      )
+    );
+  }, []);
 
-  const onGameEnd = (matchKey: string, winner: string) => {
-    console.log(`Game ended for ${matchKey}. Winner: ${winner}`);
-    setMatches(prevMatches => {
-      const updatedMatches = prevMatches.map(match => {
-        if (match.wasmEngine === matchKey) {
-          console.log(`Updating match for ${matchKey}`);
-          if (winner === "white") return { ...match, wins: match.wins + 1 };
-          if (winner === "black") return { ...match, losses: match.losses + 1 };
-          return {...match, wins: match.wins + 0.5, losses: match.losses + 0.5};
-        }
-        return match;
-      });
-      console.log("Updated matches:", updatedMatches);
-      return updatedMatches;
-    });
-
-    // Restart the game for continuous play
-    setTimeout(() => {startGame(matchKey);}, 1000);
-  };
+  // Sort teams using useMemo so sorting only recalculates when teams change.
+  const sortedTeams = useMemo(() => {
+    return [...teams].sort((a, b) => (b.won - b.lost) - (a.won - a.lost));
+  }, [teams]);
 
   return (
     <Box sx={{ padding: 3 }}>
       <Typography variant="h4" align="center">Tournament vs Random</Typography>
       <Grid2 container spacing={3}>
-        {[...matches].sort((a, b) => b.wins - a.wins).map(match => (
-          <Grid2 key={match.wasmEngine} component="div">
-            <Box sx={{ textAlign: "center", border: "1px solid gray", padding: 2, borderRadius: 3 }}>
-              <Typography width={160} variant="h6" noWrap sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{match.wasmEngine.split(".wasm")[0]}</Typography>
-              <Chessboard position={boardPositions[match.wasmEngine]} arePiecesDraggable={false} boardWidth={160} />
-              <Typography>Wins: {match.wins} | Losses: {match.losses}</Typography>
-            </Box>
-          </Grid2>
+        {sortedTeams.map((team) => (
+          <RandomGame key={team.name} teamName={team.name} onScoreChange={handleScoreChange} />
         ))}
       </Grid2>
     </Box>

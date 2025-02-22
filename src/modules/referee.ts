@@ -272,10 +272,18 @@ export class Referee {
         return this.state.game.isGameOver();
     }
 
-    startGame() {
+    resetGame() {
+        this.state.game.reset();
         this.updateStatus({
+            gameStarted: false,
+            gamePaused: false,
             gameEnded: false,
+            gameLoading: false,
+            gameReady: true
         })
+    }
+
+    startGame() {
         if (!this.status.gameReady) return;
 
         this.updateStatus({
