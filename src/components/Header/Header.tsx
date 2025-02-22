@@ -14,6 +14,7 @@ const pages = [
   { name: '1v1 Arena', path: baseUrl + 'arena', disabled: false },
   { name: 'Tournament', path: baseUrl + 'tournament', disabled: false },
   { name: 'Live', path: baseUrl + 'live', disabled: true },
+  { name: 'Engine Missing? Check Build Action', path: "https://github.com/ethan42/arena/actions", disabled: false}
 ];
 
 function DesktopHeader() {
