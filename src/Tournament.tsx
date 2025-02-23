@@ -5,6 +5,7 @@ import Grid2 from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 import Engines from './modules/engines';
 import { Referee } from './modules/referee';
+import { Container, useTheme } from '@mui/material';
 
 interface Team {
   name: string;
@@ -87,6 +88,7 @@ function RandomGame(props: RandomGameProps) {
 function Tournament() {
   const engines = new Engines();
   const [teams, setTeams] = useState<Team[]>([]);
+  const theme = useTheme();
 
   // Fetch only wasm engines (team names) and set them as teams
   useEffect(() => {
@@ -125,7 +127,8 @@ function Tournament() {
   }, [teams]);
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Container maxWidth={false} sx={{ backgroundColor: theme.palette.background.default }}>
+    <Box padding={{ xs: 2, sm: 3, md: 4 }}>
       <Typography variant="h4" align="center">Tournament vs Random</Typography>
       <Grid2 container spacing={3}>
         {sortedTeams.map((team) => (
@@ -133,6 +136,7 @@ function Tournament() {
         ))}
       </Grid2>
     </Box>
+    </Container>
   );
 }
 

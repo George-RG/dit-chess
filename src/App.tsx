@@ -47,7 +47,7 @@ const App: React.FC = () => {
     <ThemePaletteModeContext.Provider value={themePaletteModeContextProvider}>
       <ThemeProvider theme={themeProvider}>
         <CssBaseline />
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
 
           <Header/>
           <Routes>
