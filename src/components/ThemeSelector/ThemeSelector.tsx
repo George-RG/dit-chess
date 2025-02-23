@@ -18,7 +18,7 @@ const ToggleThemePaletteMode = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "left",
-          color: theme.palette.background.paper,
+          color: theme.palette.text.primary,
         }}
       >
         <Tooltip title="Toggle light/dark theme" placement="bottom">

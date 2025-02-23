@@ -13,11 +13,11 @@ import Header from './components/Header/Header';
 import MobileFooter from './components/Footers/MobileFooter';
 import DesktopFooter from './components/Footers/DesktopFooter';
 
+import { baseUrl } from './configs/constants';
+
 const ThemePaletteModeContext = React.createContext({
   toggleThemePaletteMode: () => { }
 });
-
-const baseUrl = import.meta.env.BASE_URL;
 
 const App: React.FC = () => {
 

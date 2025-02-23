@@ -17,13 +17,14 @@ const pages = [
   { name: 'Engine Missing? Check Build Action', path: "https://github.com/ethan42/arena/actions", disabled: false}
 ];
 
+
 function DesktopHeader() {
   const theme = useTheme()
   const location = useLocation(); // Get the current path
 
   return (
     <AppBar position="static" sx={{ width: '100%'}} >
-      <Container maxWidth={false} sx={{bgcolor: theme.palette.primary.main}}>
+      <Container maxWidth={false}>
         <Toolbar>
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
             <Stack direction="row" spacing={0} display="flex" alignItems="center">
@@ -39,12 +40,12 @@ function DesktopHeader() {
                 variant="h5"
                 noWrap
                 component={Link}
-                to="/" // Link to the home page
+                to={baseUrl} // Link to the home page
                 sx={{
                   mr: 2,
                   fontFamily: 'Inter',
                   fontWeight: 700,
-                  color: theme.palette.primary.contrastText,
+                  color: theme.palette.text.primary,
                   textDecoration: 'none',
                   "&:hover": { color: 'inherit' }
                 }}
@@ -104,7 +105,7 @@ function DesktopHeader() {
             ))}
           </Box>
 
-          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+          <Box >
             <ThemeSelector/>
           </Box>
         </Toolbar>
