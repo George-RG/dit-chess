@@ -30,13 +30,13 @@ function MobileFooter() {
         label="Tournament"
         icon={<FontAwesomeIcon icon={faTrophy}/>}
         component={Link}
-        to={{baseUrl} + "tournament"}
+        to={baseUrl + "tournament"}
       />
       <BottomNavigationAction
         label="Live"
         icon={<FontAwesomeIcon icon={faPlay}/>}
         component={Link}
-        to={{baseUrl} + "live"}
+        to={baseUrl + "live"}
         disabled
       />
     </BottomNavigation>
