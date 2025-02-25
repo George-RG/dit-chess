@@ -88,6 +88,17 @@ function Arena() {
     setBoardPosition(fen);
   }
 
+  const downloadPGN = () => {
+    const pgn = referee.getPGN();
+    const blob = new Blob([pgn], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href= url;
+    a.download = 'game.pgn';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const onGameEnd = (winner: string, gamesLeft: number) => {
     // If winner is black or white, update the score
     // If winner is draw, update the score with 0.5
@@ -329,7 +340,7 @@ function Arena() {
                       {(gameStarted || (!gameLoading && gamesLeft > 0)) &&
                         <Grid container spacing={2}>
                           {!gamePaused ?
-                            <Grid size={{ xs: 12, lg: 6 }}>
+                            <Grid size={{ xs: 12, lg: 4 }}>
                               <Button
                                 variant="contained"
                                 size='large'
@@ -341,7 +352,7 @@ function Arena() {
                               </Button>
                             </Grid>
                             :
-                            <Grid size={{ xs: 12, lg: 6 }}>
+                            <Grid size={{ xs: 12, lg: 4 }}>
                               <Button
                                 variant="contained"
                                 size='large'
@@ -353,7 +364,7 @@ function Arena() {
                               </Button>
                             </Grid>
                           }
-                          <Grid size={{ xs: 12, lg: 6 }}>
+                          <Grid size={{ xs: 12, lg: 4 }}>
                             <Button
                               variant="contained"
                               size='large'
@@ -362,6 +373,17 @@ function Arena() {
                               onClick={() => { referee.stopGame(); }}
                             >
                               Stop Game
+                            </Button>
+                          </Grid>
+                          <Grid size={{ xs: 12, lg: 4 }}>
+                            <Button
+                              variant="contained"
+                              size='large'
+                              fullWidth
+                              sx={{ borderRadius: 5, backgroundColor: theme.palette.primary.main }}
+                              onClick={() => { downloadPGN(); }}
+                            >
+                              Export PGN
                             </Button>
                           </Grid>
                         </Grid>

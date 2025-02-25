@@ -315,6 +315,9 @@ export class Referee {
         this.concludeGame('stop');
     }
 
+    getPGN(): string {
+        return this.state.game.pgn();
+    }
 
     async gameDriver() {
         if(this.status.gamePaused || this.status.gameEnded) return;
