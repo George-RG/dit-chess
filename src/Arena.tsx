@@ -33,6 +33,9 @@ function Arena() {
   const [totalGames, setTotalGames] = useState(1);
   const [gamesLeft, setGamesLeft] = useState(0);
 
+  const [moveLog, setMoveLog] = useState<string[]>([]);
+  const [loggingEnabled, setLoggingEnabled] = useState(false);
+
   const whiteWin = () => {
     setWhiteScore((whiteScore) => whiteScore + 1);
   }
@@ -79,7 +82,9 @@ function Arena() {
     return true;
   }
 
-  const onMove = (_: string, fen: string) => {
+  const onMove = (move: string, fen: string) => {
+    // Add the move to the move log
+    setMoveLog((moveLog) => [...moveLog, move]);
     setBoardPosition(fen);
   }
 
@@ -90,6 +95,9 @@ function Arena() {
     // If winner is stop, terminate the game
     console.log(winner);
     console.log(gamesLeft);
+
+    // Empty the move log
+    setMoveLog([]);
 
     if (winner === "black") {
       blackWin();
@@ -300,7 +308,12 @@ function Arena() {
 
                   <Grid size={{ xs: 12 }}>
                     <Stack direction="column" spacing={1}>
-                      <FormControlLabel disabled control={<Checkbox />} label="Log Results" />
+                      <FormControlLabel 
+                        control={<Checkbox />} 
+                        label="Log Results" 
+                        checked={loggingEnabled}
+                        onChange={(_, checked) => setLoggingEnabled(checked)}
+                      />
                       {/* Play button */}
                       {!(gameStarted || (!gameLoading && gamesLeft > 0)) &&
                         <Button
@@ -355,9 +368,23 @@ function Arena() {
                       }
                     </Stack>
                   </Grid>
-
                 </Grid>
               </Box>
+
+              { loggingEnabled &&
+                <Box sx={{ bgcolor: theme.palette.background.paper, border: 'solid 2px', borderColor: theme.palette.primary.main, color: 'primary.contrastText', paddingX: { xs: 5, md: 10 }, paddingY: 5, borderRadius: 5, marginLeft: "10%" }}>
+                {/* A text box to show the last moves */}
+                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+                  <Stack direction="row" spacing={1} flexWrap="wrap">
+                    {moveLog.map((move, index) => (
+                      <Typography key={index} variant="body1">
+                        {move}
+                      </Typography>
+                    ))}
+                  </Stack>
+                </Box>
+              </Box>}
+
             </Stack>
           </Grid>
         </Grid>
