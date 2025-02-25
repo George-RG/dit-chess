@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'; // Import necessary routing hooks
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { useState } from 'react';
+import { baseUrl } from '../../configs/constants';
+
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChess, faPlay, faTrophy } from '@fortawesome/free-solid-svg-icons';
@@ -22,20 +24,19 @@ function MobileFooter() {
         label="1v1 Arena"
         icon={<FontAwesomeIcon icon={faChess} />}
         component={Link}
-        to="/"
+        to={{baseUrl} + "arena"}
       />
       <BottomNavigationAction
         label="Tournament"
         icon={<FontAwesomeIcon icon={faTrophy}/>}
         component={Link}
-        to="/tournament"
-        disabled
+        to={{baseUrl} + "tournament"}
       />
       <BottomNavigationAction
         label="Live"
         icon={<FontAwesomeIcon icon={faPlay}/>}
         component={Link}
-        to="/live"
+        to={{baseUrl} + "live"}
         disabled
       />
     </BottomNavigation>

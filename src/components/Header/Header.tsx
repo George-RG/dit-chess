@@ -57,7 +57,7 @@ function DesktopHeader() {
 
           <Box width="100%" sx={{display: { xs: 'flex', md: 'none' } }} justifyContent="center">
             <Stack direction="row" spacing={0} display="flex" alignItems="center">
-              <Link to="/">
+              <Link to={baseUrl}>
                 <img
                   src={ChessLogo}
                   alt="Dit Chess Logo"
@@ -69,7 +69,7 @@ function DesktopHeader() {
                 variant="h5"
                 noWrap
                 component={Link}
-                to="/" // Link to the home page
+                to={baseUrl} // Link to the home page
                 sx={{
                   mr: 2,
                   fontFamily: 'Inter',
